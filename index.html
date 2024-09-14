@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Visualizer Page</title>
     <link rel="stylesheet" href="styles.css" />
-    <!--<script src="https://d3js.org/d3.v7.min.js"></script>-->
     <script src="lib/d3.min.js"></script>
     <!--<script src="node_modules/esprima/dist/esprima.js"></script>
     <script src="node_modules/acorn/dist/acorn.js"></script>
@@ -17,8 +16,11 @@
         import * as Interpreter from 'node_modules/js-interpreter/lib/js-interpreter.min.js';
     </script>-->
     <script src="https://cdn.jsdelivr.net/npm/esprima"></script>
-    <script src="https://cdn.jsdelivr.net/npm/escodegen"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/escodegen"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/js-interpreter"></script>
+    <!--<script src="escodegen.browser.js"></script>-->
+    <!--<script src="./node_modules/acorn-es6/index.js"></script>
+    <script src="./node_modules/interpret/index.js"></script>-->
 
     <script src="app.js" charset="UTF-8" type="module" defer></script>
 </head>
@@ -29,10 +31,44 @@
         <form method="post" id="user-code-form">
             <label for="user-code-textarea">Enter your code here</label>
             <br>
-            <textarea id="user-code-textarea" name="user-code" rows="10" cols="100">console.log("hello world"); console.log('hi');</textarea>
+            <textarea id="user-code-textarea" name="user-code" rows="10" cols="100">const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const target = 12;
+let start = 0;
+let end = arr.length - 1;
+while (start <= end) {
+    const middle = (start + end) // 2;
+    if (target < arr[middle]) {
+        end = middle - 1;
+    } else if (target > arr[middle]) {
+        start = middle + 1;
+    } else {
+        console.log(middle);
+        break;
+    }
+}
+            </textarea>
+            <br>
+            <label for="included-variables">Enter the variables you want to visualize here:</label>
+            <br>
+            <input id="included-variables" style="width:350px" value="arr, target, start, end, middle">
             <br>
             <input type="submit" value="Submit your code"/>
-            <!--<script src="dist/bundle.js"></script>-->
+        </form>
+        <form method="post" id="slider-form">
+            <div class="slider-container" id="slider-container">
+
+            </div>
+            <button>left</button>
+            <p style="display:inline-block;">1</p>
+            <button>right</button>
+        </form>
+            <!--<svg viewbox="0 0 5 5">
+                <g transform="scale(0.004)">
+                    <path fill="black" 
+                        d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z">
+                    </path>
+                </g>
+            </svg>-->
         </form>
     </div>
     <br>

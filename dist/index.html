@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizer Page</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!--<script src="https://d3js.org/d3.v7.min.js"></script>-->
+    <script src="lib/d3.min.js"></script>
+    <!--<script src="node_modules/esprima/dist/esprima.js"></script>
+    <script src="node_modules/acorn/dist/acorn.js"></script>
+    <script src="node_modules/escodegen/escodegen.js" type="module"></script>
+    <script src="node_modules/estraverse/estraverse.js" type="module"></script>-->
+    
+    <!--<script type="module">
+        import * as esprima from 'node_modules/esprima/dist/esprima.js';
+        import * as escodegen from 'node_modules/escodegen/escodegen.js';
+        import * as Interpreter from 'node_modules/js-interpreter/lib/js-interpreter.min.js';
+    </script>-->
+    <script src="https://cdn.jsdelivr.net/npm/esprima"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/escodegen"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/js-interpreter"></script>
+    <!--<script src="escodegen.browser.js"></script>-->
+    <!--<script src="./node_modules/acorn-es6/index.js"></script>
+    <script src="./node_modules/interpret/index.js"></script>-->
+
+    <script src="app.js" charset="UTF-8" type="module" defer></script>
+    <script defer src="main.js"></script>
+</head>
+<body>
+    <div></div>
+    <h1>Javascript algorithm visualizer</h1>
+    <div id="user-code">
+        <form method="post" id="user-code-form">
+            <label for="user-code-textarea">Enter your code here</label>
+            <br>
+            <textarea id="user-code-textarea" name="user-code" rows="10" cols="100">console.log("hello world"); console.log('hi');</textarea>
+            <br>
+            <input type="submit" value="Submit your code"/>
+            <!--<script src="dist/bundle.js"></script>-->
+        </form>
+    </div>
+    <br>
+    <div id="visualization-container"></div>
+    <!--<marker id="arrow" viewBox="0 0 10 10" refx="5" refy="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z"/>
+    </marker>-->
+</body>

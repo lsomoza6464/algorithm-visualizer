@@ -1,9 +1,34 @@
 import { Visualizer } from './visualizer.js';
-import { Parser } from './parser.js';
-const form = document.getElementById('user-code-form');
-form.addEventListener('submit', handleFormSubmit);
-const visualizer = new Visualizer(600, 600);
-const parser = new Parser();
+import { parseCode } from './parser.js';
+import { ProgressBar } from './progress-bar.js';
+//import { map } from './lib/';
+//const Visualizer = require('./visualizer.js');
+//const Parser = require('./parser.js');
+/*
+const userCode = `
+let me = 4 + 3 + 2 + 1;
+let arr = [[[1]], 1, 2, 3];
+me = arr[2];
+me = arr[0][0][0];//arr[0] = me + arr[1] + 2 + 4;
+arr[0] = me;
+me = arr[1];
+for (let i = 0; i < 4; i++) {
+    arr.push(i);
+}
+`;
+*/
+
+const userCodeform = document.getElementById('user-code-form');
+userCodeform.addEventListener('submit', handleFormSubmit);
+const sliderForm = document.getElementById('slider-form');
+sliderForm.addEventListener('submit', handleSliderDirection);
+let progressBar = null;
+
+//const snapshots = parseCode(userCode);
+//console.log(snapshots);
+//const visualizer = new Visualizer(600, 600);
+//const progressBar = new ProgressBar(visualizer, snapshots);
+//const parser = new Parser();
 /*
 const escodegen = require('escodegen');
 const estraverse = require('estraverse');
@@ -24,11 +49,37 @@ console.log(generatedCode);
 */
 
 function handleFormSubmit(event) {
-    console.log('here');
     event.preventDefault();
     const userCodeTextarea = document.getElementById('user-code-textarea');
+    const includedVariables = document.getElementById('included-variables').value.split(',').map((value) => value.trim());
+    console.log('included', includedVariables)
     const userCode = userCodeTextarea.value;
-    const result = parser.parseCode(userCode);
+    const snapshots = parseCode(userCode, includedVariables);
+    const visualizer = new Visualizer(600, 600);
+    clearSlider();
+    progressBar = new ProgressBar(visualizer, snapshots);
+    progressBar.visualizeBar(snapshots.length);
+    return userCode;
+}
+
+function clearSlider() {
+    d3.select('#slider-container').html('');
+}
+
+function handleSliderDirection(event) {
+    event.preventDefault();
+    const sliderSvg = document.getElementById('sliderSvg');
+    console.log(sliderSvg);
+    if (event.innerText === 'left') {
+        progressBar.iterateProgressBar();
+        progressBar.clearContainer()
+        progressBar.visualizeBar();
+    } else {
+        console.log('right');
+        progressBar.iterateProgressBar();
+        progressBar.clearContainer();
+        progressBar.visualizeBar();
+    }
 }
 
 const userArr = [1, 2, 3, 10, 20, 30 , 40, 50, 60, 100, 10, 1, 1, 1,1,1,11,1,1,1,1,11,1,1];
@@ -117,7 +168,10 @@ const graph2 = {
         {value:"B"}
     ]
 }
-
+const visualizer = new Visualizer(600, 600);
+//visualizer.visualize('userArr', userArr);
+//progressBar.visualizeBar(snapshots.length);
+visualizer.visualize('ha', 'here');
 visualizer.visualizeArr('userArr', userArr);
 visualizer.visualizeSet('mySet', mySet);
 visualizer.visualizeLinkedList('myLinkedList', myLinkedList);

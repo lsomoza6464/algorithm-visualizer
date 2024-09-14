@@ -4,16 +4,47 @@ export class Visualizer {
             .attr('width', width)
             .attr('height', height);
         this.strokeSize = 2.5;
+        this.marginSize = 10
     }
   
     //progromatically add svgs into the div as new data structures are added so you do not have to deal with structure counters
     //The first element is a little smaller of a separator than the other elements, not a big issue but maybe look into
-  
+
+    clear() {
+        this.container.html('');
+    }
+
+    visualizeAll(snapshotArr) {
+        console.log('here');
+        for (let i = 0; i < snapshotArr.length; i++) {
+            console.log(snapshotArr[i].name, snapshotArr[i].value);
+            this.visualize(snapshotArr[i].name, snapshotArr[i].value);
+        }
+    }
+
+    visualize(name, value) {
+        console.log('here', value, typeof value);
+        if (typeof value != 'object') {
+            this.visualizeVariable(name, value);
+        } else if(value instanceof Array) {
+            this.visualizeArr(name, value);
+            console.log(typeof value)
+        }
+    }
+
+    visualizeVariable(name, value) {
+        this.container.append('div')
+            .style("margin-left", this.marginSize + 'px')
+            .style('margin-top', '10px')
+            .text(`${name}: ${value}`);
+    }
+
     visualizeVariableArr(names, values) {
         this.drawDoubleArr(names, values);
     }
 
     visualizeArr(name, arr){
+        console.log(name, arr);
         const squareWidth = 50;
         const marginSize = 10;
         const strokeSize = this.strokeSize
