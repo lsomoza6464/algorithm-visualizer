@@ -57,7 +57,7 @@ function handleFormSubmit(event) {
     const snapshots = parseCode(userCode, includedVariables);
     const visualizer = new Visualizer(600, 600);
     clearSlider();
-    progressBar = new ProgressBar(visualizer, snapshots);
+    progressBar = new ProgressBar(visualizer, snapshots, ['start', 'end', 'middle']);
     progressBar.visualizeBar(snapshots.length);
     return userCode;
 }

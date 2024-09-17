@@ -4,7 +4,9 @@ export class Visualizer {
             .attr('width', width)
             .attr('height', height);
         this.strokeSize = 2.5;
-        this.marginSize = 10
+        this.marginSize = 10;
+        this.colors = ['red', 'yellow', 'green', 'blue'];
+        this.values = [];
     }
   
     //progromatically add svgs into the div as new data structures are added so you do not have to deal with structure counters
@@ -14,20 +16,20 @@ export class Visualizer {
         this.container.html('');
     }
 
-    visualizeAll(snapshotArr) {
+    visualizeAll(snapshotArr, values) {
         console.log('here');
         for (let i = 0; i < snapshotArr.length; i++) {
             console.log(snapshotArr[i].name, snapshotArr[i].value);
-            this.visualize(snapshotArr[i].name, snapshotArr[i].value);
+            this.visualize(snapshotArr[i].name, snapshotArr[i].value, values);
         }
     }
 
-    visualize(name, value) {
+    visualize(name, value, values) {
         console.log('here', value, typeof value);
         if (typeof value != 'object') {
             this.visualizeVariable(name, value);
         } else if(value instanceof Array) {
-            this.visualizeArr(name, value);
+            this.visualizeArr(name, value, values);
             console.log(typeof value)
         }
     }
@@ -43,7 +45,7 @@ export class Visualizer {
         this.drawDoubleArr(names, values);
     }
 
-    visualizeArr(name, arr){
+    visualizeArr(name, arr, values){
         console.log(name, arr);
         const squareWidth = 50;
         const marginSize = 10;
@@ -60,7 +62,7 @@ export class Visualizer {
             //svg.append('text').text('arr');
             //svg.append('br');
   
-        this.drawSquares(svg, arr, squareWidth, marginSize, strokeSize);
+        this.drawSquares(svg, arr, squareWidth, marginSize, strokeSize, 0, 0, 'rect', values);
         this.writeText(svg, arr, squareWidth, marginSize, strokeSize);
     }
   
@@ -486,8 +488,9 @@ export class Visualizer {
 
     }
   
-    drawSquares(svg, data, squareWidth, marginSize, strokeSize, curveAmount = 0, yStart = 0, selectorType="rect"){
+    drawSquares(svg, data, squareWidth, marginSize, strokeSize, curveAmount = 0, yStart = 0, selectorType="rect", values = []){
         //console.log(data)
+        const colors = this.colors;
         svg.selectAll(selectorType)
         .data(data)
         .enter()
@@ -497,7 +500,18 @@ export class Visualizer {
             .attr('x', function(d, i) { return strokeSize/2 + i * (squareWidth) + marginSize; }) //Extra this.strokeSize + added in order to prevent part of the border from being cut off
             .attr('width', squareWidth)
             .attr('height', squareWidth)
-            .attr('fill', 'white')
+            .attr('fill', function (d, i) {
+                if (!values) {
+                    return 'white'
+                }
+                for (let j = 0; j < Math.min(4, values.length); j++) {
+                    if (values[j] == i) {
+                        console.log(values, colors[j]);
+                        return colors[j];
+                    }
+                }
+                return 'white';
+            })
             .attr('stroke', 'black')
             .attr('stroke-width', strokeSize)
             .attr('rx', curveAmount)

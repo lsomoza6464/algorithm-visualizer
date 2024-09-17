@@ -140,14 +140,22 @@ function traverseAndInstrument(node) {
     console.log(acorn.parse(originalVars));
     bodyArr.push(acorn.parse(originalVars));
 
-    for (const line of node.body) {
+    console.log('currNode', node);
+    let currBody;
+    if (node.body.body) {
+        currBody = node.body.body
+    } else {
+        currBody = node.body
+    }
+    for (const line of currBody) {
         bodyArr.push(line);
         for (const snapLine of snapshotAst.body) {
             bodyArr.push(snapLine);
         }
         if (line.type === 'WhileStatement') {
             // Parse the snapshotCode into an AST
-            improvedTraverseAndInjectSnapshots(line, includedVariables, node.body, 'body');
+            //improvedTraverseAndInjectSnapshots(line, includedVariables, node.body, 'body');
+            traverseLoopsAndInjectSnapshots(line, includedVariables, node.body, 'body');
             //const snapshotAst = acorn.parse(snapshotCode);
             // Append the snapshot code to the end of the loop's body
             //line.body.body.push(snapshotAst.body[0]);
@@ -180,7 +188,6 @@ function traverseAndInstrument(node) {
         type: 'ExpressionStatement',
         expression: iifeExpression
     };
-    //node.body = newStatement;
     node.body = [];
     console.log(node.body);
     node.body.push(newStatement);
@@ -190,8 +197,106 @@ function traverseAndInstrument(node) {
             body: [node]
         }
         ast = newBlock;
-        console.log(ast);
     }
+  }
+
+  function traverseLoopsAndInjectSnapshots(node, includedVariables = [], parentNode = null, parentkey = null) {
+    const snapshotCode = `
+        //__PAUSE__//
+        // Capture snapshots of relevant variables
+        snapshot = [];
+        for (const varIndex in context) {
+            if(typeof context[varIndex] !== 'undefined'){
+                //console.log(context[varIndex]);
+                if (context.hasOwnProperty(varIndex)) {
+                    try {
+                        snapshot.push({ 
+                            name: context[varIndex],
+                            type: typeof eval(context[varIndex]),
+                            value: structuredClone(eval(context[varIndex]))
+                        });
+                        /*snapshot[varIndex] = { 
+                            name: context[varIndex],
+                            type: typeof eval(context[varIndex]),
+                            value: structuredClone(eval(context[varIndex]))
+                        };*/
+                    } catch(error) {
+                        if (error instanceof ReferenceError) {
+                            snapshot[varIndex] = {
+                                name: context[varIndex],
+                                type: 'undefined',
+                                value: undefined
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        snapshots.push(snapshot);
+    `;
+    let bodyArr = [];
+    const snapshotAst = acorn.parse(snapshotCode);
+    console.log(includedVariables);
+    const originalVars = `
+        let snapshot = new Map();
+        const context = ${JSON.stringify(includedVariables)};
+    `;
+    console.log('origin', originalVars);
+
+    console.log(acorn.parse(originalVars));
+    bodyArr.push(acorn.parse(originalVars));
+
+    console.log('currNode', node);
+    for (const line of node.body.body) {
+        bodyArr.push(line);
+        for (const snapLine of snapshotAst.body) {
+            bodyArr.push(snapLine);
+        }
+        if (line.type === 'WhileStatement') {
+            // Parse the snapshotCode into an AST
+            traverseLoopsAndInjectSnapshots(line, includedVariables, node.body, 'body');
+            //const snapshotAst = acorn.parse(snapshotCode);
+            // Append the snapshot code to the end of the loop's body
+            //line.body.body.push(snapshotAst.body[0]);
+        }
+    }
+    /*
+    const returnStatement = `console.log(snapshots);`;
+    bodyArr.push(acorn.parse(returnStatement));
+    const returnStatementNode = {
+        type: 'ReturnStatement',
+        argument: {
+          type: 'Identifier',
+          name: 'snapshots'
+        }
+    };
+    bodyArr.push(returnStatementNode);
+    const iifeExpression = {
+        type: 'CallExpression',
+        callee: {
+            type: 'FunctionExpression',
+            id: null,
+            params: [],
+            body: {
+                type: 'BlockStatement',
+                body: bodyArr 
+            }
+        },
+        arguments: []
+    };
+    const newStatement = {
+        type: 'ExpressionStatement',
+        expression: iifeExpression
+    };*/
+    node.body.body = bodyArr;
+    /*node.body.push(newStatement);
+    if (!parentNode && !parentkey) {
+        const newBlock = {
+            type:"BlockStatement",
+            body: [node]
+        }
+        ast = newBlock;
+    }*/
   }
 
   function traverseAndInjectSnapshots(node, parentNode = null, parentKey = null) {

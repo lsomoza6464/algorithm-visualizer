@@ -1,7 +1,7 @@
 import { Visualizer } from "./visualizer.js";
 
 export class ProgressBar {
-    constructor(visualizer, snapshots, width = 50, height = 20) {
+    constructor(visualizer, snapshots, valueNames = [], width = 50, height = 20) {
         this.container = d3.select('#slider-container')
             .style('position', 'relative')
             .style('box-sizing', 'border-box')
@@ -11,9 +11,11 @@ export class ProgressBar {
         this.snapshots = snapshots;
         this.value = 1;
         this.maxValue = snapshots.length;
+        this.valueNames = valueNames;
     }
 
     visualizeBar(maxValue = 20) {
+        const valueNames = this.valueNames;
         const visualizer = this.visualizer;
         const snapshots = this.snapshots;
         let value = 1
@@ -74,9 +76,19 @@ export class ProgressBar {
         }
 
         function visualizeValueChange(value) {
-            console.log('snapshots', snapshots[value - 1]);
+            console.log('snapshots3', snapshots[value - 1]);
             visualizer.clear();
-            visualizer.visualizeAll(snapshots[value - 1]);
+            visualizer.visualizeAll(snapshots[value - 1], getHighlightedValues(snapshots[value-1]));
+
+            function getHighlightedValues(snapshot) {
+                let values = [];
+                for (const variable of snapshot) {
+                    if (valueNames.includes(variable.name)) {
+                        values.push(variable.value);
+                    }
+                }
+                return values;
+            }
         }
     }
     iterateProgressBar() {

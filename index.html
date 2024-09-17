@@ -31,20 +31,24 @@
         <form method="post" id="user-code-form">
             <label for="user-code-textarea">Enter your code here</label>
             <br>
-            <textarea id="user-code-textarea" name="user-code" rows="10" cols="100">const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+            <textarea id="user-code-textarea" name="user-code" rows="10" cols="100">const arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 const target = 12;
 let start = 0;
 let end = arr.length - 1;
-while (start <= end) {
-    const middle = (start + end) // 2;
+let targetFound = false;
+while (start <= end && !targetFound) {
+    const middle = Math.floor((start + end) / 2);
     if (target < arr[middle]) {
         end = middle - 1;
     } else if (target > arr[middle]) {
         start = middle + 1;
     } else {
         console.log(middle);
-        break;
+        targetFound = true;
     }
+}
+if (!targetFound) {
+    console.log(-1);
 }
             </textarea>
             <br>
