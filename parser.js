@@ -20,8 +20,8 @@
 //import jsx from './node_modules/acorn-jsx/';
 //import es7 from './node_modules/acorn-es7-plugin/acorn-es7-plugin';
 //import { functionOne, functionTwo } from './myModule.mjs'; 
-import * as acorn from './node_modules/acorn/dist/acorn.mjs';
-import { generate } from './node_modules/astring/dist/astring.js';
+import * as acorn from './lib/acorn.mjs';
+import { generate } from './lib/astring.js';
 //import * as vm from 'vm';
 //let vm = require('vm');
 //import vm from 'vm';
