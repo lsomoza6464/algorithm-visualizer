@@ -30,7 +30,8 @@ export class Visualizer {
             this.visualizeVariable(name, value);
         } else if(value instanceof Array) {
             this.visualizeArr(name, value, values);
-            console.log(typeof value)
+        } else if(value instanceof Set) {
+            this.visualizeSet(name, value);
         }
     }
 
