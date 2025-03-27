@@ -1,25 +1,3 @@
-//import { createRequire } from './module.js';
-//const require = createRequire(import.meta.url);
-
-//const esprima = require('esprima');
-//const escodegen = require('escodegen');
-//const Interpreter = require('js-interpreter');
-
-//import * as esprima from './node_modules/esprima/dist/esprima.js';
-//import * as escodegen from './node_modules/escodegen/escodegen.js';
-//import * as Interpreter from './node_modules/js-interpreter/lib/js-interpreter.js';
-//import { esprima } from './node_modules/esprima/dist/esprima.js';
-//import { escodegen } from './node_modules/escodegen/escodegen.js';
-//import { JSInterpreter } from './node_modules/js-interpreter/lib/js-interpreter.js';
-//import * as acorn from 'acorn';
-//import jsx from 'acorn-jsx';
-//import es7 from 'acorn-es7-plugin';
-//import { functionOne, functionTwo } from './myModule.mjs';
-//import * as escodegenBrowse from './escodegen.browser.js'; 
-//import * as escodegen from './node_modules/escodegen/escodegen.js';
-//import jsx from './node_modules/acorn-jsx/';
-//import es7 from './node_modules/acorn-es7-plugin/acorn-es7-plugin';
-//import { functionOne, functionTwo } from './myModule.mjs'; 
 import * as acorn from './lib/acorn.mjs';
 import { generate } from './lib/astring.js';
 //import * as vm from 'vm';
@@ -55,78 +33,63 @@ let value = matrix[0][0][1];
 let requestedVars = [];
 let snapshots = [[]];
 let ast;
-
-/*export function runCode(userCode) {
-    const parser = acorn.Parser; 
-    ast = parser.parse(userCode, { sourceType: 'module' });
-    traverseAndInjectSnapshots(ast);
-    console.log(ast);
-    const instrumentedCode = generate(ast);
-    console.log('new code', instrumentedCode);
-}*/
-
-function traverseAndInstrument(node) {
-    // ... (handle variable declarations and assignments)
-  
-    // Inject pause points and snapshot capture code
-    if (true) {
-      const snapshotCode = `
-        //__PAUSE__//
-        
-        // Capture snapshots of relevant variables
-        const snapshot = {};
-        for (const varName in this) {
-          if (this.hasOwnProperty(varName)) {
-            snapshot[varName] = { 
-              type: typeof this[varName],
-              value: structuredClone(this[varName])
-            };
-          }
-        }
-        snapshots.push(snapshot);
-      `;
-  
-      // Inject the generated code at the appropriate location
-      // (Use AST manipulation)
-    }
-  
-    // ... (recursively traverse child nodes)
-  }
-
-  function improvedTraverseAndInjectSnapshots(node, includedVariables = [], parentNode = null, parentkey = null) {
-    const snapshotCode = `
-        //__PAUSE__//
-        // Capture snapshots of relevant variables
-        snapshot = [];
-        for (const varIndex in context) {
-            if(typeof context[varIndex] !== 'undefined'){
-                //console.log(context[varIndex]);
-                if (context.hasOwnProperty(varIndex)) {
-                    try {
-                        snapshot.push({ 
+const snapshotCode = `
+    //__PAUSE__//
+    // Capture snapshots of relevant variables
+    snapshot = [];
+    for (const varIndex in context) {
+        if(typeof context[varIndex] !== 'undefined'){
+            if (context.hasOwnProperty(varIndex)) {
+                try {
+                    snapshot.push({ 
+                        name: context[varIndex],
+                        type: typeof eval(context[varIndex]),
+                        value: structuredClone(eval(context[varIndex]))
+                    });
+                    /*snapshot[varIndex] = { 
+                        name: context[varIndex],
+                        type: typeof eval(context[varIndex]),
+                        value: structuredClone(eval(context[varIndex]))
+                    };*/
+                } catch(error) {
+                    if (error instanceof ReferenceError) {
+                        snapshot[varIndex] = {
                             name: context[varIndex],
-                            type: typeof eval(context[varIndex]),
-                            value: structuredClone(eval(context[varIndex]))
-                        });
-                        /*snapshot[varIndex] = { 
-                            name: context[varIndex],
-                            type: typeof eval(context[varIndex]),
-                            value: structuredClone(eval(context[varIndex]))
-                        };*/
-                    } catch(error) {
-                        if (error instanceof ReferenceError) {
-                            snapshot[varIndex] = {
-                                name: context[varIndex],
-                                type: 'undefined',
-                                value: undefined
-                            }
+                            type: 'undefined',
+                            value: undefined
                         }
                     }
                 }
             }
         }
-        snapshots.push(snapshot);
-    `;
+    }
+    snapshots.push(snapshot);
+    selectedSnapshot = [];
+    for (const varIndex in selectedContext) {
+        if(typeof selectedContext[varIndex] !== 'undefined'){
+            if (selectedContext.hasOwnProperty(varIndex)) {
+                try {
+                    selectedSnapshot.push({ 
+                        name: selectedContext[varIndex],
+                        type: typeof eval(selectedContext[varIndex]),
+                        value: structuredClone(eval(selectedContext[varIndex]))
+                    });
+                } catch(error) {
+                    if (error instanceof ReferenceError) {
+                        selectedSnapshot[varIndex] = {
+                            name: selectedContext[varIndex],
+                            type: 'undefined',
+                            value: undefined
+                        }
+                    }
+                }
+            }
+        }
+    }
+    selectedSnapshots.push(selectedSnapshot);
+`;
+
+  function improvedTraverseAndInjectSnapshots(node, includedVariables = [], selectedVariables = [], parentNode = null, parentkey = null) {
     let bodyArr = [];
     const snapshotAst = acorn.parse(snapshotCode);
     console.log(includedVariables);
@@ -134,6 +97,9 @@ function traverseAndInstrument(node) {
         let snapshots = [];
         let snapshot = new Map();
         const context = ${JSON.stringify(includedVariables)};
+        let selectedSnapshots = [];
+        let selectedSnapshot = new Map();
+        const selectedContext = ${JSON.stringify(selectedVariables)};
     `;
     console.log('origin', originalVars);
 
@@ -153,21 +119,22 @@ function traverseAndInstrument(node) {
             bodyArr.push(snapLine);
         }
         if (line.type === 'WhileStatement') {
-            // Parse the snapshotCode into an AST
-            //improvedTraverseAndInjectSnapshots(line, includedVariables, node.body, 'body');
-            traverseLoopsAndInjectSnapshots(line, includedVariables, node.body, 'body');
-            //const snapshotAst = acorn.parse(snapshotCode);
-            // Append the snapshot code to the end of the loop's body
-            //line.body.body.push(snapshotAst.body[0]);
+            traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.body, 'body');
         }
     }
-    const returnStatement = `console.log(snapshots);`;
+    const returnStatement = `console.log(snapshots);
+    const variableMap = new Map()
+    variableMap.set('snapshots', snapshots);
+    variableMap.set('selectedSnaphots', selectedSnapshots);
+    const snapshotObject = {snapshots: snapshots, selectedSnapshots: selectedSnapshots};
+    console.log('booyeah', snapshotObject);`;
     bodyArr.push(acorn.parse(returnStatement));
     const returnStatementNode = {
         type: 'ReturnStatement',
         argument: {
           type: 'Identifier',
-          name: 'snapshots'
+          //name: 'snapshots'
+          name: 'snapshotObject'
         }
     };
     bodyArr.push(returnStatementNode);
@@ -200,46 +167,16 @@ function traverseAndInstrument(node) {
     }
   }
 
-  function traverseLoopsAndInjectSnapshots(node, includedVariables = [], parentNode = null, parentkey = null) {
-    const snapshotCode = `
-        //__PAUSE__//
-        // Capture snapshots of relevant variables
-        snapshot = [];
-        for (const varIndex in context) {
-            if(typeof context[varIndex] !== 'undefined'){
-                //console.log(context[varIndex]);
-                if (context.hasOwnProperty(varIndex)) {
-                    try {
-                        snapshot.push({ 
-                            name: context[varIndex],
-                            type: typeof eval(context[varIndex]),
-                            value: structuredClone(eval(context[varIndex]))
-                        });
-                        /*snapshot[varIndex] = { 
-                            name: context[varIndex],
-                            type: typeof eval(context[varIndex]),
-                            value: structuredClone(eval(context[varIndex]))
-                        };*/
-                    } catch(error) {
-                        if (error instanceof ReferenceError) {
-                            snapshot[varIndex] = {
-                                name: context[varIndex],
-                                type: 'undefined',
-                                value: undefined
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        snapshots.push(snapshot);
-    `;
+  function traverseLoopsAndInjectSnapshots(node, includedVariables = [], selectedVariables = [], parentNode = null, parentkey = null) {
+
     let bodyArr = [];
     const snapshotAst = acorn.parse(snapshotCode);
     console.log(includedVariables);
     const originalVars = `
         let snapshot = new Map();
         const context = ${JSON.stringify(includedVariables)};
+        let selectedSnapShot = new Map();
+        const selectedContext = ${JSON.stringify(selectedVariables)};
     `;
     console.log('origin', originalVars);
 
@@ -254,7 +191,7 @@ function traverseAndInstrument(node) {
         }
         if (line.type === 'WhileStatement') {
             // Parse the snapshotCode into an AST
-            traverseLoopsAndInjectSnapshots(line, includedVariables, node.body, 'body');
+            traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.body, 'body');
             //const snapshotAst = acorn.parse(snapshotCode);
             // Append the snapshot code to the end of the loop's body
             //line.body.body.push(snapshotAst.body[0]);
@@ -400,19 +337,19 @@ const snapShot = new Map();
 
 //parseCode(userCode);
 
-// Directly use the Acorn parser without extending it
-export function parseCode(userCode, includedVariables = []) {
-    const parser = acorn.Parser; 
+
+/*const worker = new Worker('worker.js');
+worker.onmessage = function(event) {
+    const { snapshots } = event.data;
+    // ... Use the snapshots for visualization (e.g., update your D3.js visualization)
+}; */
+
+export function parseCode(userCode, includedVariables = [], selectedVariables = []) {
+    const parser = acorn.Parser;
     ast = parser.parse(userCode, { sourceType: 'module' });
-    console.log(ast);
-    improvedTraverseAndInjectSnapshots(ast, includedVariables);
+    improvedTraverseAndInjectSnapshots(ast, includedVariables, selectedVariables);
     const instrumentedCode = generate(ast);
     console.log('new code', instrumentedCode);
-    const worker = new Worker('worker.js');
-    worker.onmessage = function(event) {
-        const { snapshots } = event.data;
-        // ... Use the snapshots for visualization (e.g., update your D3.js visualization)
-    };
     const snapshots = eval(instrumentedCode);
     console.log(snapshots);
     return snapshots

@@ -1,6 +1,7 @@
 import { Visualizer } from './visualizer.js';
 import { parseCode } from './parser.js';
 import { ProgressBar } from './progress-bar.js';
+import { DirectionButton } from './direction-button.js'
 //import { map } from './lib/';
 //const Visualizer = require('./visualizer.js');
 //const Parser = require('./parser.js');
@@ -17,12 +18,11 @@ for (let i = 0; i < 4; i++) {
 }
 `;
 */
-
+let progressBar = null;
 const userCodeform = document.getElementById('user-code-form');
 userCodeform.addEventListener('submit', handleFormSubmit);
-const sliderForm = document.getElementById('slider-form');
-sliderForm.addEventListener('submit', handleSliderDirection);
-let progressBar = null;
+//const sliderForm = document.getElementById('slider-form');
+//sliderForm.addEventListener('submit', handleSliderDirection);
 
 //const snapshots = parseCode(userCode);
 //console.log(snapshots);
@@ -51,35 +51,76 @@ console.log(generatedCode);
 function handleFormSubmit(event) {
     event.preventDefault();
     const userCodeTextarea = document.getElementById('user-code-textarea');
-    const includedVariables = document.getElementById('included-variables').value.split(',').map((value) => value.trim());
-    console.log('included', includedVariables)
     const userCode = userCodeTextarea.value;
-    const snapshots = parseCode(userCode, includedVariables);
+    const selectedMap = getSelectedMap()
+    console.log(selectedMap);
+    const selectedVariables = getSelectedVariables(selectedMap);
+    const includedVariables = document.getElementById('included-variables').value.split(',').map((value) => value.trim());
+    let snapshotObject = parseCode(userCode, includedVariables, selectedVariables);
+    snapshotObject.selectedMap = selectedMap;
+    console.log(snapshotObject);
     const visualizer = new Visualizer(600, 600);
     clearSlider();
-    progressBar = new ProgressBar(visualizer, snapshots, ['start', 'end', 'middle']);
-    progressBar.visualizeBar(snapshots.length);
+    progressBar = new ProgressBar(visualizer, snapshotObject);
+    let leftButton = new DirectionButton('left', progressBar);
+    let rightButton = new DirectionButton('right', progressBar);
     return userCode;
+}
+
+function getSelectedVariables(selectedMap) {
+    let selectedSet = new Set();
+    selectedMap.forEach((value) => {
+        for (const variable of value) {
+            selectedSet.add(variable)
+        }
+    });
+    return new Array(...selectedSet);
+}
+
+function getSelectedMap() {
+    const selectedVariablesRaw = document.getElementById('selected-variables').value.split(';').map((value) => value.trim());
+    const selectedVariables = selectedVariablesRaw.map((variable) => {
+        const variableObject = {name: variable.split(':')[0].trim()};
+        const selected = variable.split(':')[1].split(',').map((value) => value.trim());
+        variableObject.selected = selected;
+        return variableObject;
+    });
+    console.log('selected', selectedVariables);
+    let selectedMap = new Map();
+    for (let j = 0; j < selectedVariables.length; j++) {
+        selectedMap.set(selectedVariables[j].name, selectedVariables[j].selected);
+    }
+    return selectedMap;
 }
 
 function clearSlider() {
     d3.select('#slider-container').html('');
 }
 
-function handleSliderDirection(event) {
+/*function handleSliderDirection(event) {
     event.preventDefault();
     const sliderSvg = document.getElementById('sliderSvg');
     console.log(sliderSvg);
+    console.log('innertext', event); //big bug innertext undefined (fix later)
     if (event.innerText === 'left') {
-        progressBar.iterateProgressBar();
-        progressBar.clearContainer()
-        progressBar.visualizeBar();
+        progressBar.deterateProgressBar();
+        //xprogressBar.visualizeValueChange();
+        //progressBar.clearContainer()
+        //progressBar.visualizeBar();
     } else {
-        console.log('right');
         progressBar.iterateProgressBar();
-        progressBar.clearContainer();
-        progressBar.visualizeBar();
+        //progressBar.visualizeValueChange();
+        //progressBar.clearContainer();
+        //progressBar.visualizeBar();
     }
+}*/
+
+export function handleLeftClicked() {
+    progressBar.deterateProgressBar();
+}
+
+export function handleRightClicked() {
+    progressBar.iterateProgressBar();
 }
 
 const userArr = [1, 2, 3, 10, 20, 30 , 40, 50, 60, 100, 10, 1, 1, 1,1,1,11,1,1,1,1,11,1,1];

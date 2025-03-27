@@ -16,19 +16,33 @@ export class Visualizer {
         this.container.html('');
     }
 
-    visualizeAll(snapshotArr, values) {
-        console.log('here');
+    visualizeAll(snapshotArr, selectorMap) {
+        console.log('here3', snapshotArr, selectorMap);
         for (let i = 0; i < snapshotArr.length; i++) {
-            console.log(snapshotArr[i].name, snapshotArr[i].value);
-            this.visualize(snapshotArr[i].name, snapshotArr[i].value, values);
+            if (selectorMap.has(snapshotArr[i].name)) {
+                console.log('here6', selectorMap.get(snapshotArr[i].name));
+                this.visualizeWithValues(snapshotArr[i].name, snapshotArr[i].value, selectorMap.get(snapshotArr[i].name));
+            } else {
+                this.visualize(snapshotArr[i].name, snapshotArr[i].value);
+            }
         }
     }
 
-    visualize(name, value, values) {
-        console.log('here', value, typeof value);
+    visualize(name, value) {
         if (typeof value != 'object') {
             this.visualizeVariable(name, value);
         } else if(value instanceof Array) {
+            this.visualizeArr(name, value);
+        } else if(value instanceof Set) {
+            this.visualizeSet(name, value);
+        }
+    }
+
+    visualizeWithValues(name, value, values) {
+        if (typeof value != 'object') {
+            this.visualizeVariable(name, value);
+        } else if(value instanceof Array) {
+            console.log('here5', value, values)
             this.visualizeArr(name, value, values);
         } else if(value instanceof Set) {
             this.visualizeSet(name, value);
@@ -47,7 +61,7 @@ export class Visualizer {
     }
 
     visualizeArr(name, arr, values){
-        console.log(name, arr);
+        console.log('here-1', name, arr, values);
         const squareWidth = 50;
         const marginSize = 10;
         const strokeSize = this.strokeSize
@@ -490,7 +504,7 @@ export class Visualizer {
     }
   
     drawSquares(svg, data, squareWidth, marginSize, strokeSize, curveAmount = 0, yStart = 0, selectorType="rect", values = []){
-        //console.log(data)
+        console.log('here8', values)
         const colors = this.colors;
         svg.selectAll(selectorType)
         .data(data)

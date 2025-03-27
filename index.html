@@ -5,6 +5,21 @@
     <title>Visualizer Page</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="lib/d3.min.js"></script>
+    <!--<script>
+        import { handleRightClicked, handleLeftClicked } from 'app.js';
+        //might need to wait for DOM to load first
+        /*
+        const rightButton = document.getElementById('rightButton');
+        rightButton.addEventListener('click', handleRightClicked);
+        const leftButton = document.getElementById('leftButton');
+        leftButton.addEventListener('click', handleLeftClicked);*/
+        function handleRight(){
+            handleRightClicked();
+        }
+        function handleLeft(){
+            handleLeftClicked();
+        }
+    </script>-->
     <!--<script src="node_modules/esprima/dist/esprima.js"></script>
     <script src="node_modules/acorn/dist/acorn.js"></script>
     <script src="node_modules/escodegen/escodegen.js" type="module"></script>
@@ -52,20 +67,26 @@ if (!targetFound) {
 }
             </textarea>
             <br>
-            <label for="included-variables">Enter the variables you want to visualize here:</label>
+            <label for="included-variables">Enter the variables that you want to visualize here:</label>
             <br>
-            <input id="included-variables" style="width:350px" value="arr, target, start, end, middle">
+            <input id="included-variables" style="min-width:350px" value="arr, target, start, end, middle">
+            <br>
+            <br>
+            <label for="selected-variables">Enter the target variables and their data structures that you want to visualize here:</label>
+            <br>
+            <input id="selected-variables" style='min-width: 350px' value="arr:start, end, middle">
+            <br>
             <br>
             <input type="submit" value="Submit your code"/>
         </form>
-        <form method="post" id="slider-form">
-            <div class="slider-container" id="slider-container">
-
-            </div>
-            <button>left</button>
-            <p style="display:inline-block;">1</p>
-            <button>right</button>
-        </form>
+        <!--<form method="post" id="slider-form">-->
+        <br>
+        <div class="left-container" id="left-container"></div>
+        <div class="slider-container" id="slider-container"></div>
+        <div class="right-container" id="right-container"></div>
+        <button id="leftButton">left</button>
+        <p style="display:inline-block;">1</p>
+        <button id="rightButton">right</button>
             <!--<svg viewbox="0 0 5 5">
                 <g transform="scale(0.004)">
                     <path fill="black" 
