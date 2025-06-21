@@ -118,9 +118,24 @@ const snapshotCode = `
         for (const snapLine of snapshotAst.body) {
             bodyArr.push(snapLine);
         }
-        if (line.type === 'WhileStatement') {
+        const loopTypes = new Set([
+            'WhileStatement',
+            'ForStatement',
+            'ForInStatement',
+            'ForOfStatement',
+            'DoWhileStatement'
+        ]);
+        
+        if (loopTypes.has(line.type)) {
+            // For all loops
             traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.body, 'body');
-        }
+        } /*else if (line.type === 'IfStatement') {
+            // For if/else blocks
+            traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.consequent, 'consequent');
+            if (line.alternate) {
+                traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.alternate, 'alternate');
+            }
+        }*/
     }
     const returnStatement = `console.log(snapshots);
     const variableMap = new Map()
@@ -172,8 +187,8 @@ const snapshotCode = `
     let bodyArr = [];
     const snapshotAst = acorn.parse(snapshotCode);
     console.log(includedVariables);
-    const originalVars = `
-        let snapshot = new Map();
+    /*const originalVars = `
+        //let snapshot = new Map();
         const context = ${JSON.stringify(includedVariables)};
         let selectedSnapShot = new Map();
         const selectedContext = ${JSON.stringify(selectedVariables)};
@@ -181,21 +196,40 @@ const snapshotCode = `
     console.log('origin', originalVars);
 
     console.log(acorn.parse(originalVars));
-    bodyArr.push(acorn.parse(originalVars));
+    bodyArr.push(acorn.parse(originalVars));*/
 
     console.log('currNode', node);
-    for (const line of node.body.body) {
+    let statements;
+    /*if (node.type === 'IfStatement') {
+        // For if statements, we need to handle consequent and alternate separately
+        statements = node.consequent.body || [node.consequent];
+    } else {*/
+        // For loops, use the body property
+        statements = node.body.body || node.body;
+    //}
+    for (const line of statements) {
         bodyArr.push(line);
         for (const snapLine of snapshotAst.body) {
             bodyArr.push(snapLine);
         }
-        if (line.type === 'WhileStatement') {
-            // Parse the snapshotCode into an AST
+        const loopTypes = new Set([
+            'WhileStatement',
+            'ForStatement',
+            'ForInStatement',
+            'ForOfStatement',
+            'DoWhileStatement'
+        ]);
+        
+        if (loopTypes.has(line.type)) {
+            // For all loops
             traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.body, 'body');
-            //const snapshotAst = acorn.parse(snapshotCode);
-            // Append the snapshot code to the end of the loop's body
-            //line.body.body.push(snapshotAst.body[0]);
-        }
+        } /*else if (line.type === 'IfStatement') {
+            // For if/else blocks
+            traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.consequent, 'consequent');
+            if (line.alternate) {
+                traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.alternate, 'alternate');
+            }
+        }*/
     }
     /*
     const returnStatement = `console.log(snapshots);`;
@@ -225,15 +259,18 @@ const snapshotCode = `
         type: 'ExpressionStatement',
         expression: iifeExpression
     };*/
-    node.body.body = bodyArr;
-    /*node.body.push(newStatement);
-    if (!parentNode && !parentkey) {
-        const newBlock = {
-            type:"BlockStatement",
-            body: [node]
+    /*if (node.type === 'IfStatement') {
+        node.consequent.body = bodyArr;
+        // Handle alternate if it exists
+        if (node.alternate && node.alternate.type === 'BlockStatement') {
+            // Process alternate branch similarly
+            // ... similar logic for alternate
         }
-        ast = newBlock;
+    } else {
+        // For loops
+        node.body.body = bodyArr;
     }*/
+   node.body.body = bodyArr;
   }
 
   function traverseAndInjectSnapshots(node, parentNode = null, parentKey = null) {
@@ -303,7 +340,6 @@ const snapshotCode = `
         if (typeof child === 'object' && child !== null) {
           if (Array.isArray(child)) {
             child.forEach(childNode => traverseAndInjectSnapshots(childNode, node, key));   
-  
           } else {
             traverseAndInjectSnapshots(child, node, key);
           }

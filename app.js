@@ -2,6 +2,7 @@ import { Visualizer } from './visualizer.js';
 import { parseCode } from './parser.js';
 import { ProgressBar } from './progress-bar.js';
 import { DirectionButton } from './direction-button.js'
+//import React from 'react';
 //import { map } from './lib/';
 //const Visualizer = require('./visualizer.js');
 //const Parser = require('./parser.js');
@@ -60,10 +61,11 @@ function handleFormSubmit(event) {
     snapshotObject.selectedMap = selectedMap;
     console.log(snapshotObject);
     const visualizer = new Visualizer(600, 600);
-    clearSlider();
+    clearContainers();
     progressBar = new ProgressBar(visualizer, snapshotObject);
     let leftButton = new DirectionButton('left', progressBar);
     let rightButton = new DirectionButton('right', progressBar);
+    progressBar.visualizeValueChange();
     return userCode;
 }
 
@@ -93,8 +95,11 @@ function getSelectedMap() {
     return selectedMap;
 }
 
-function clearSlider() {
+function clearContainers() {
     d3.select('#slider-container').html('');
+    d3.select('#left-container').html('');
+    d3.select('#right-container').html('');
+    //d3.select('visualization-container').html('');
 }
 
 /*function handleSliderDirection(event) {
@@ -209,15 +214,17 @@ const graph2 = {
         {value:"B"}
     ]
 }
-const visualizer = new Visualizer(600, 600);
+const matrix = [[0, 1, 2, 3], [4, 4, 4, 4], [5, 4, 3, 2]];
 //visualizer.visualize('userArr', userArr);
 //progressBar.visualizeBar(snapshots.length);
+const visualizer = new Visualizer(600, 600);
 visualizer.visualize('ha', 'here');
 visualizer.visualizeArr('userArr', userArr);
 visualizer.visualizeSet('mySet', mySet);
 visualizer.visualizeLinkedList('myLinkedList', myLinkedList);
 visualizer.visualizeLinkedList('myLinkedList', myLinkedList, true);
 visualizer.visualizeHashmap('hashmap', hashmap);
+visualizer.visualizeMatrix('matrix', matrix);
 visualizer.visualizeTree('tree', tree);
 visualizer.visualizeGraph('graph', graph);
 visualizer.visualizeGraph('graph2', graph2, false);

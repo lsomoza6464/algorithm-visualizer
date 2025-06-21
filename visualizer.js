@@ -1,7 +1,7 @@
-export class Visualizer {
+export class Visualizer { //-- may want to switch to typescript, also lots of parameters which is very confusing, maybe include var names in the 
     constructor(width, height){
         this.container = d3.select('#visualization-container')
-            .attr('width', width)
+            .attr('width', width) //--not actually the minimum width, the container shrinks and expands with contents
             .attr('height', height);
         this.strokeSize = 2.5;
         this.marginSize = 10;
@@ -61,10 +61,10 @@ export class Visualizer {
     }
 
     visualizeArr(name, arr, values){
-        console.log('here-1', name, arr, values);
+        //console.log('here-1', name, arr, 'vals:', values);
         const squareWidth = 50;
         const marginSize = 10;
-        const strokeSize = this.strokeSize
+        const strokeSize = this.strokeSize;
         const width = arr.length * squareWidth + strokeSize + marginSize * 2;
         const height = squareWidth + strokeSize + marginSize;
         this.container.append('br');
@@ -76,9 +76,55 @@ export class Visualizer {
             .attr('height', height);
             //svg.append('text').text('arr');
             //svg.append('br');
-  
+        console.log("vals2:", values)
         this.drawSquares(svg, arr, squareWidth, marginSize, strokeSize, 0, 0, 'rect', values);
         this.writeText(svg, arr, squareWidth, marginSize, strokeSize);
+    }
+
+    visualizeMatrix(name, matrix, values) { //-- need better name than values (I think these are selected values)
+        console.log('init matrix: name:', name, 'contents:', matrix, 'values:', values);
+        const squareWidth = 50;
+        const marginSize = 10;
+        const strokeSize = this.strokeSize;
+        const width = matrix[0].length * squareWidth + strokeSize + marginSize * 2;
+        const height = matrix.length * squareWidth + strokeSize + marginSize; //assuming that this has the same size column arrays
+        this.container.append('br'); //append line break?
+        this.writeVariableName(name, marginSize);
+        const svg = this.container.append('svg')
+        .attr('class', 'svgMatrix') // Changed class name for better semantics
+        .attr('width', width)
+        .attr('height', height);
+
+        // Bind matrix data to 'g' elements, each representing a row
+        const rows = svg.selectAll(".matrix-row") // Select elements with class 'matrix-row'
+            .data(matrix) // Bind the outer array (matrix)
+            .enter()
+            .append("g") // Append a group 'g' for each row
+            .attr("class", "matrix-row")
+            // Use transform to position each row group vertically
+            .attr("transform", (d, rowIndex) => `translate(${marginSize}, ${marginSize + rowIndex * squareWidth})`);
+            // The translate applies to the entire group, so elements inside
+            // can be positioned relative to their group's top-left.
+
+        // Now, for each 'g' (row group), draw the squares and text
+        rows.each((rowData, rowIndex, nodes) => {
+            const currentRowGroup = d3.select(nodes[rowIndex]); // Select the current 'g' element
+
+            // Call drawSquares and writeText using the currentRowGroup as the selection.
+            // The yStart parameter can now be 0, as the row's vertical position
+            // is handled by the 'transform' on the group.
+            this.drawSquares(currentRowGroup, rowData, squareWidth, 0, strokeSize, 0, 0, 'rect', values); // marginSize is now applied by the group's transform. Pass 0 for internal margin
+            this.writeText(currentRowGroup, rowData, squareWidth, 0, strokeSize, 0, 0, ".valueText"); // Same for text
+        });
+        /*const svg = this.container.append('svg')
+            .attr('class', 'svgArr')
+            .attr('width', width)
+            .attr('height', height);
+        for (let i = 0; i < matrix.length; i++) {
+            console.log('height:', squareWidth * i);
+            this.drawSquares(svg, matrix[i], squareWidth, marginSize, strokeSize, 0, squareWidth * i, 'rect', values);
+            this.writeText(svg, matrix[i], squareWidth, marginSize, strokeSize, 0, squareWidth * i, ".valueText");
+        }*/
     }
   
     visualizeLinkedList(name, head, doubly = false){
@@ -349,7 +395,7 @@ export class Visualizer {
         drawGraph(nodeArr, edgeArr);
 
         function drawGraph(nodeArr, edgeArr){
-            const simulation = d3.forceSimulation(nodeArr)
+            const simulation = d3.forceSimulation(nodeArr) //-- try to speed up simulation even if less accurate
                 .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
                 .force("charge", d3.forceManyBody().strength(-300))
                 .force("center", d3.forceCenter(0, 0))
@@ -504,14 +550,14 @@ export class Visualizer {
     }
   
     drawSquares(svg, data, squareWidth, marginSize, strokeSize, curveAmount = 0, yStart = 0, selectorType="rect", values = []){
-        console.log('here8', values)
+        console.log('here8', yStart)
         const colors = this.colors;
         svg.selectAll(selectorType)
         .data(data)
         .enter()
         .append('rect')
             .attr('id', (d, i) => "square-" + i) //or function(d, i) { return "square-" + i}
-            .attr('y',marginSize + yStart)
+            .attr('y', marginSize + yStart)
             .attr('x', function(d, i) { return strokeSize/2 + i * (squareWidth) + marginSize; }) //Extra this.strokeSize + added in order to prevent part of the border from being cut off
             .attr('width', squareWidth)
             .attr('height', squareWidth)
@@ -577,7 +623,7 @@ export class Visualizer {
   
         this.drawSquares(group, arr1, squareWidth, marginSize, strokeSize, 0, 0, ".keys");
         this.writeText(group, arr1, squareWidth, marginSize, strokeSize, 0, 0, ".keyText");
-        this.drawSquares(group, arr2, squareWidth, marginSize, strokeSize, 0, squareWidth, ".values");
+        this.drawSquares(group, arr2, squareWidth, marginSize, strokeSize, 0, squareWidth, ".values"); //-- IDK why this is .values and not just values
         this.writeText(group, arr2, squareWidth, marginSize, strokeSize, 0, squareWidth, ".valueText");
     }
 

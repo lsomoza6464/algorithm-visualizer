@@ -44,19 +44,19 @@ export class ProgressBar {
 
         this.progressBarBackground.call(d3.drag()
             .on('start drag', (event) => {
-                this.value = this.updateProgressBar(event.x);
+                this.updateProgressBar(event.x);
                 console.log('val', this.value);
             })
             ).on('click', (event) => {
-                this.value = this.updateProgressBar(event.x);
+                this.updateProgressBar(event.x);
                 console.log('val', this.value);
             });
         this.progressBarFill.call(d3.drag()
             .on('start drag', (event) => {
-                this.value = this.updateProgressBar(event.x);
+                this.updateProgressBar(event.x);
             })
             ).on('click', (event) => {
-                this.value = this.updateProgressBar(event.x);
+                this.updateProgressBar(event.x);
             });  
 
     }
@@ -194,6 +194,7 @@ export class ProgressBar {
         if (oldValue != this.value) {
             this.visualizeValueChange();
         }
+        console.log("currval", this.value)
     }
     iterateProgressBar() {
         console.log('here4')
