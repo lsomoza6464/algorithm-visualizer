@@ -1,3 +1,5 @@
+import { ListNode } from "./listNode.js";
+
 export class Visualizer { //-- may want to switch to typescript, also lots of parameters which is very confusing, maybe include var names in the 
     constructor(width, height){
         this.container = d3.select('#visualization-container')
@@ -32,11 +34,13 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
 
     visualize(name, value, values=[]) {
         if (typeof value != 'object') {
-            this.visualizeVariable(name, value, values);
+            this.visualizeVariable(name, value);
         } else if(value instanceof Array) {
             this.visualizeArr(name, value, values);
         } else if(value instanceof Set) {
             this.visualizeSet(name, value);
+        } else if(value instanceof ListNode || "next" in value ) {
+            this.visualizeLinkedList(name, value, false, values)
         }
     }
 
@@ -129,7 +133,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         }*/
     }
   
-    visualizeLinkedList(name, head, doubly = false){
+    visualizeLinkedList(name, head, doubly = false, values = []){
         let list = [];
         let currNode = head;
         while(currNode != null){ //or while(currNode.next){}
@@ -178,6 +182,18 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                 .attr('y1', strokeSize/2 + marginSize + circleRadius)
                 .attr('x2', function(d, i) { return strokeSize/2 + i * (circleDiameter + arrowLength) + marginSize + circleDiameter + arrowLength; })
                 .attr('y2', strokeSize/2 + marginSize + circleRadius)
+                .attr('fill', function (d, i) {
+                    if (!values) {
+                        return 'white'
+                    }
+                    for (let j = 0; j < Math.min(4, values.length); j++) {
+                        if (values[j] == i) {
+                            console.log(values, colors[j]);
+                            return colors[j];
+                        }
+                    }
+                    return 'white';
+                })
                 .attr('stroke', 'black')
                 .attr("stroke-width", 1)
                 .attr("marker-end", "url(#arrow-head)");
