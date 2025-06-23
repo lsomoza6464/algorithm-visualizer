@@ -1,4 +1,6 @@
+import { GraphNode } from "./graphNode";
 import { ListNode } from "./listNode.js";
+import { TreeNode } from "./treeNode";
 
 export class Visualizer { //-- may want to switch to typescript, also lots of parameters which is very confusing, maybe include var names in the 
     constructor(width, height){
@@ -41,6 +43,10 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             this.visualizeSet(name, value);
         } else if(value instanceof ListNode || "next" in value ) {
             this.visualizeLinkedList(name, value, false, values)
+        } else if(value instanceof TreeNode || "children" in value || "left" in value || "right" in value) {
+            this.visualizeTree(name, value);
+        } else if(value instanceof GraphNode || "neighbors" in value) {
+            this.visualizeGraph(name, value, false);
         }
     }
 
