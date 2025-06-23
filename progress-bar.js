@@ -169,7 +169,6 @@ export class ProgressBar {
     getSelectedSnapshot(selectedSnapshot) {
         let snapshotMap = new Map();
         selectedSnapshot.forEach((value) => snapshotMap.set(value.name, value.value));
-        console.log(snapshotMap);
         let valueMap = new Map();
         this.selectedMap.forEach((value, key) => {
             const selectedList = value;

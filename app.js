@@ -135,13 +135,13 @@ const userArr = [1, 2, 3, 10, 20, 30 , 40, 50, 60, 100, 10, 1, 1, 1,1,1,11,1,1,1
 const myArr = [40, 20 , 10000];
 const mySet = new Set([1, 2, 3, 5, 6]);
 /*const myLinkedList = {
-    value:1,
+    val:1,
     next:{
-        value:2, 
+        val:2, 
         next:{
             value:3,
             next:{
-                value:4
+                val:4
             }
         }
     }
@@ -154,34 +154,35 @@ let hashmap = {
     23:4
 }
 const tree = new TreeNode("A", new TreeNode("B", new TreeNode("D"), new TreeNode("T")), new TreeNode("F", new TreeNode("G"), new TreeNode("H"), new TreeNode("I"), new TreeNode("J"), new TreeNode("K", new TreeNode("R"), new TreeNode("Q", new TreeNode("W")))));
-/*const graph = new GraphNode("A", [
+/*const graph = {
+    val: "A",
+    neighbors: [
         {
-            value: "B",
+            val: "B",
             neighbors: [
                 {
-                    value:"D",
+                    val:"D",
                     neighbors: [
-                        {value:"G"}
+                        {val:"G"}
                     ]
                 }
             ]
         },
         {
-            value: "C",
+            val: "C",
             neighbors: [
-                {value: "E"},
-                {value: "F"},
-                {value: "A"}
+                {val: "E"},
+                {val: "F"},
+                {val: "A"}
             ]
         },
-        {value:"G"},
-        {value:"H"},
-        {value:"I"},
-        {value:"J"},
-        {value:"K"},
-        {value:"L"}
-    ]
-);*/
+        {val:"G"},
+        {val:"H"},
+        {val:"I"},
+        {val:"J"},
+        {val:"K"},
+        {val:"L"}]
+}*/
 const graph = new GraphNode("A", [
     new GraphNode("B", [new GraphNode("D", [new GraphNode("G")])]),
     new GraphNode("C", [new GraphNode("E"), new GraphNode("F"), new GraphNode("A")]),

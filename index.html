@@ -65,16 +65,59 @@ while (start <= end && !targetFound) {
 if (!targetFound) {
     console.log(-1);
 }
+//testing linkedlist and graph
+const myLinkedList = {
+    val:1,
+    next:{
+        val:2, 
+        next:{
+            val:3,
+            next:{
+                val:4
+            }
+        }
+    }
+}
+const graph = {
+    val: "A",
+    neighbors: [
+        {
+            val: "B",
+            neighbors: [
+                {
+                    val:"D",
+                    neighbors: [
+                        {val:"G"}
+                    ]
+                }
+            ]
+        },
+        {
+            val: "C",
+            neighbors: [
+                {val: "E"},
+                {val: "F"},
+                {val: "A"}
+            ]
+        },
+        {val:"G"},
+        {val:"H"},
+        {val:"I"},
+        {val:"J"},
+        {val:"K"},
+        {val:"L"}]
+}
+let curr = myLinkedList;
             </textarea>
             <br>
             <label for="included-variables">Enter the variables that you want to visualize here:</label>
             <br>
-            <input id="included-variables" style="min-width:350px" value="arr, target, start, end, middle">
+            <input id="included-variables" style="min-width:350px" value="arr, target, start, end, middle, myLinkedList, graph, curr">
             <br>
             <br>
             <label for="selected-variables">Enter the target variables and their data structures that you want to visualize here:</label>
             <br>
-            <input id="selected-variables" style='min-width: 350px' value="arr:start, end, middle">
+            <input id="selected-variables" style='min-width: 350px' value="arr:start, end, middle; myLinkedList:curr">
             <br>
             <br>
             <input type="submit" value="Submit your code"/>
