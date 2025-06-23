@@ -157,6 +157,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         const arrowLength = 20;
         const height = circleDiameter + strokeSize + marginSize;
         const width = (circleDiameter + arrowLength) * list.length + strokeSize + marginSize * 2;
+        const colors = this.colors;
 
 
         this.container.append('br');
@@ -174,20 +175,6 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             .attr("refY", 0)
             .attr("markerWidth", 16)
             .attr("markerHeight", 16)
-            .attr('fill', function (d, i) {
-                if (!values) {
-                    return 'white'
-                }
-                console.log("here27", values, i)
-                for (let j = 0; j < Math.min(4, values.length); j++) {
-                    console.log("here28", values[j], values[j] != null, "val" in values, values[j].val == i.val);
-                    if (values[j] != null && "val" in values[j] && values[j].val == i.val) {
-                        console.log(values, colors[j]);
-                        return colors[j];
-                    }
-                }
-                return 'white';
-            })
             .attr("orient", "auto")
                 .append('path')
                 .attr("fill", "black")
@@ -218,7 +205,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                     .attr("stroke-width", 1)
                     .attr("marker-end", "url(#arrow-head)");
         }
-        this.drawCircles(svg, list, circleDiameter, marginSize, strokeSize, arrowLength);
+        this.drawCircles(svg, list, circleDiameter, marginSize, strokeSize, arrowLength, values);
         this.writeText(svg, list, circleDiameter, marginSize, strokeSize, arrowLength);
     }
   
@@ -715,9 +702,10 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                 .text(d => d);
     }
   
-    drawCircles(svg, data, circleDiameter, marginSize, strokeSize, seperationSize = 0) {
+    drawCircles(svg, data, circleDiameter, marginSize, strokeSize, seperationSize = 0, values = []) {
         const circleRadius = circleDiameter/2;
-  
+        const colors = this.colors;
+
         svg.selectAll('circle')
             .data(data)
             .enter()
@@ -726,7 +714,20 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                 .attr('cy', marginSize + circleRadius)
                 .attr('cx', function(d, i) { return strokeSize/2 + i * (circleDiameter + seperationSize) + marginSize + circleRadius; })
                 .attr('r', circleRadius)
-                .attr('fill', 'white')
+                .attr('fill', function (d, i) {
+                    if (!values) {
+                        return 'white'
+                    }
+                    console.log("here27", values, i)
+                    for (let j = 0; j < Math.min(4, values.length); j++) {
+                        console.log("here28", values[j], i, data[i], values[j] != null, "val" in values[j], values[j].val == data[i]);
+                        if (values[j] != null && "val" in values[j] && values[j].val == data[i]) {
+                            console.log('colors', values, colors);
+                            return colors[j];
+                        }
+                    }
+                    return 'white';
+                })
                 .attr('stroke', 'black')
                 .attr('stroke-width', strokeSize);
     }

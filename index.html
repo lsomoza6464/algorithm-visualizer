@@ -78,35 +78,16 @@ const myLinkedList = {
         }
     }
 }
-const graph = {
-    val: "A",
-    neighbors: [
-        {
-            val: "B",
-            neighbors: [
-                {
-                    val:"D",
-                    neighbors: [
-                        {val:"G"}
-                    ]
-                }
-            ]
-        },
-        {
-            val: "C",
-            neighbors: [
-                {val: "E"},
-                {val: "F"},
-                {val: "A"}
-            ]
-        },
-        {val:"G"},
-        {val:"H"},
-        {val:"I"},
-        {val:"J"},
-        {val:"K"},
-        {val:"L"}]
-}
+const graph = new GraphNode("A", [
+    new GraphNode("B", [new GraphNode("D", [new GraphNode("G")])]),
+    new GraphNode("C", [new GraphNode("E"), new GraphNode("F"), new GraphNode("A")]),
+    new GraphNode("G"),
+    new GraphNode("H"),
+    new GraphNode("I"),
+    new GraphNode("J"),
+    new GraphNode("K"),
+    new GraphNode("L")
+]);
 let curr = myLinkedList;
             </textarea>
             <br>
