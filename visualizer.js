@@ -21,33 +21,35 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         for (let i = 0; i < snapshotArr.length; i++) {
             if (selectorMap.has(snapshotArr[i].name)) {
                 console.log('here6', selectorMap.get(snapshotArr[i].name));
-                this.visualizeWithValues(snapshotArr[i].name, snapshotArr[i].value, selectorMap.get(snapshotArr[i].name));
+                this.visualize(snapshotArr[i].name, snapshotArr[i].value, selectorMap.get(snapshotArr[i].name));
             } else {
                 this.visualize(snapshotArr[i].name, snapshotArr[i].value);
             }
+
+            //this.visualize(snapshotArr[i].name, snapshotArr[i].value, selectorMap.get(snapshotArr[i].name));
         }
     }
 
-    visualize(name, value) {
+    visualize(name, value, values=[]) {
         if (typeof value != 'object') {
-            this.visualizeVariable(name, value);
+            this.visualizeVariable(name, value, values);
         } else if(value instanceof Array) {
-            this.visualizeArr(name, value);
+            this.visualizeArr(name, value, values);
         } else if(value instanceof Set) {
             this.visualizeSet(name, value);
         }
     }
 
-    visualizeWithValues(name, value, values) {
+    /*visualizeWithValues(name, value, values) {
         if (typeof value != 'object') {
             this.visualizeVariable(name, value);
         } else if(value instanceof Array) {
             console.log('here5', value, values)
             this.visualizeArr(name, value, values);
         } else if(value instanceof Set) {
-            this.visualizeSet(name, value);
+            this.visualizeSet(name, value, values);
         }
-    }
+    }*/
 
     visualizeVariable(name, value) {
         this.container.append('div')
@@ -131,7 +133,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         let list = [];
         let currNode = head;
         while(currNode != null){ //or while(currNode.next){}
-            list.push(currNode.value);
+            list.push(currNode.val);
             currNode = currNode.next;
         }
 
@@ -229,6 +231,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
     visualizeTree(name, root) { //create a 2d array that is full of each node's value and the amount of leaf nodes that it has (find
     //the leaf nodes through a recursive function that takes the amount of leaf nodes of each of its children then use the amount of leaf nodes to determine the spacing of the nodes)
         //node attributes
+        console.log("root", root);
         const circleDiameter = 50;
         const circleRadius = circleDiameter / 2;
         const marginSize = 10;
@@ -249,11 +252,57 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             .attr('class', 'svgTree')
             .attr('width', treeWidth)
             .attr('height', treeHeight);
-  
+        console.log("nodeMatrix", nodeMatrix)
         drawNodeCircles(nodeMatrix);
         drawNodeArrows(nodeMatrix);
         
         function populateNodeMatrix(node){
+            let previousLeafs = new Array(treeDepth);
+            for(let i = 0; i < treeDepth; i++){
+                nodeMatrix.push(new Array());
+                previousLeafs[i] = 0;
+            }
+            recurseNodes(node, 0);
+        
+            function recurseNodes(node, depth){
+                if (!node) return 0;
+                let leafNodes = 0;
+                let childAmt = 0;
+                let leftLeafs = 0, rightLeafs = 0;
+        
+                if(node.left || node.right){
+                    if(node.left){
+                        leftLeafs = recurseNodes(node.left, depth + 1);
+                        childAmt++;
+                    }
+                    if(node.right){
+                        rightLeafs = recurseNodes(node.right, depth + 1);
+                        childAmt++;
+                    }
+                    leafNodes = leftLeafs + rightLeafs;
+                } else {
+                    leafNodes = 1;
+                }
+        
+                const totalLeafs = previousLeafs[depth] + leafNodes / 2;
+                console.log("nodeMatrix", nodeMatrix);
+                nodeMatrix[depth].push({
+                    val: node.val,
+                    childAmt: childAmt,
+                    xVal: strokeSize/2 + (circleDiameter + seperationSize) * (totalLeafs) + marginSize,
+                    yVal: marginSize + circleRadius + (seperationSize + circleDiameter) * depth
+                });
+                previousLeafs[depth] += leafNodes;
+                if(!node.left && !node.right){
+                    for(let i = depth + 1; i < treeDepth; i++){
+                        previousLeafs[i] += 1;
+                    }
+                }
+                return leafNodes;
+            }
+        }
+        
+        function populateMultiNodeMatrix(node){
             let previousLeafs = new Array(treeDepth);
             for(let i = 0; i < treeDepth; i++){
                 nodeMatrix.push(new Array());
@@ -274,7 +323,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                 }
                 const totalLeafs = previousLeafs[depth] + leafNodes / 2;
                 //console.log(node.value + ", " + previousLeafs[depth] + ", " + leafNodes + ", " + totalLeafs);
-                nodeMatrix[depth].push({"value": node.value, "childAmt": childAmt, "xVal": strokeSize/2 + (circleDiameter + seperationSize) * (totalLeafs) + marginSize, "yVal": marginSize + circleRadius + (seperationSize + circleDiameter) *depth});//rewrite later as points instead of arrays
+                nodeMatrix[depth].push({"value": node.val, "childAmt": childAmt, "xVal": strokeSize/2 + (circleDiameter + seperationSize) * (totalLeafs) + marginSize, "yVal": marginSize + circleRadius + (seperationSize + circleDiameter) *depth});//rewrite later as points instead of arrays
                 previousLeafs[depth] += leafNodes;
                 if(!node.children){
                     for(let i = depth + 1; i < treeDepth; i++){//a little inefficient, maybe want to fix
@@ -308,7 +357,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                         .attr('y', function(d) { return d.yVal})
                         .attr('x', function(d) { return d.xVal; })
                         .attr('text-anchor', 'middle')
-                        .text(d => d.value);
+                        .text(d => d.val);
             }
         }
 
@@ -339,7 +388,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                             .attr('y1', currNode.yVal + (y2 - currNode.yVal)/reductionRatio)
                             .attr('x2', x2 - (x2 - currNode.xVal)/reductionRatio)
                             .attr('y2', y2 - (y2 - currNode.yVal)/reductionRatio)
-                            .attr("class", currNode.value)
+                            .attr("class", currNode.val)
                             .attr("stroke", "black")
                             .attr("stroke-width", 1)
                             .attr("marker-end", "url(#arrow-head)");
@@ -349,7 +398,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             }
         }
   
-        function findtreeDepth(node){//maybe rename to treeDepth
+        function findmultitreeDepth(node){//maybe rename to treeDepth
             let maxDepth = 1;
             recurseNodes(node, 1);
             return maxDepth;
@@ -364,6 +413,28 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                     }
                 }
                 return;
+            }
+        }
+        function findtreeDepth(node) {
+            if (!node) return 0;  // Handle null node case
+            let maxDepth = 1;
+            recurseNodes(node, 1);
+            return maxDepth;
+        
+            function recurseNodes(node, depth) {
+                if (!node) return;  // Base case for null nodes
+                
+                if (depth > maxDepth) {
+                    maxDepth = depth;
+                }
+                
+                // Recurse on left and right children if they exist
+                if (node.left) {
+                    recurseNodes(node.left, depth + 1);
+                }
+                if (node.right) {
+                    recurseNodes(node.right, depth + 1);
+                }
             }
         }
     }
@@ -394,19 +465,23 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         populateNodeEdgeArr(startNode);
         drawGraph(nodeArr, edgeArr);
 
-        function drawGraph(nodeArr, edgeArr){
-            const simulation = d3.forceSimulation(nodeArr) //-- try to speed up simulation even if less accurate
-                .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
-                .force("charge", d3.forceManyBody().strength(-300))
-                .force("center", d3.forceCenter(0, 0))
-                .force("collide", d3.forceCollide().radius(circleRadius + 5)) // Add collision force
-                .on("end", () => {
+        function drawGraph(nodeArr, edgeArr, fast = false){
+            if(fast){
+                const simulation = d3.forceSimulation(nodeArr)
+                    .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
+                    .force("charge", d3.forceManyBody().strength(-300))
+                    .force("center", d3.forceCenter(0, 0))
+                    // Removed collision force for speed
+                    .alphaDecay(0.2) // Much faster decay
+                    .velocityDecay(0.6) // Higher velocity decay
+                    .alphaMin(0.01) // Higher minimum alpha to stop earlier
+                    .on("end", () => {
                     // Step 2: Extract the node positions
                     const nodePositions = nodeArr.map(node => ({
                         id: node.id,
                         x: node.x,
                         y: node.y,
-                        value: node.value
+                        val: node.val
                     }));
                     centerGraph(nodePositions);
 
@@ -418,7 +493,33 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                     // Step 3: Draw the static graph using the extracted positions
                     drawNodes(nodePositions);
                     drawEdges(nodePositionsTable, edgeArr);
-            });
+                });
+            } else {
+                const simulation = d3.forceSimulation(nodeArr)
+                    .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
+                    .force("charge", d3.forceManyBody().strength(-300))
+                    .force("center", d3.forceCenter(0, 0))
+                    .force("collide", d3.forceCollide().radius(circleRadius + 5))
+                    .on("end", () => {
+                    // Step 2: Extract the node positions
+                    const nodePositions = nodeArr.map(node => ({
+                        id: node.id,
+                        x: node.x,
+                        y: node.y,
+                        val: node.val
+                    }));
+                    centerGraph(nodePositions);
+
+
+                    const nodePositionsTable = {};
+                    for(let i = 0; i < nodePositions.length; i++) {
+                        nodePositionsTable[nodePositions[i].id] = nodePositions[i];
+                    }
+                    // Step 3: Draw the static graph using the extracted positions
+                    drawNodes(nodePositions);
+                    drawEdges(nodePositionsTable, edgeArr);
+                });
+            }
 
             function getMaxMin(nodePositions) {
                 for(let i = 0; i < nodePositions.length; i++) {
@@ -459,7 +560,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                         .attr('y', (d, i) => nodePositions[i].y)
                         .attr('x', (d, i) => nodePositions[i].x)
                         .attr('text-anchor', 'middle') //text anchor middle vertically as well
-                        .text((d, i) => nodePositions[i].value);
+                        .text((d, i) => nodePositions[i].val);
                     
             }
             function drawEdges(nodePositionsTable, edgeArr) {
@@ -535,7 +636,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             }
             function addNode(node){
                 if(!node.id){
-                    node.id = node.value;
+                    node.id = node.val;
                 }
                 if(!nodeSet.has(node.id)) {
                     nodeSet.add(node.id);

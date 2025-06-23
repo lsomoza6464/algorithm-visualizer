@@ -2,6 +2,9 @@ import { Visualizer } from './visualizer.js';
 import { parseCode } from './parser.js';
 import { ProgressBar } from './progress-bar.js';
 import { DirectionButton } from './direction-button.js'
+import { ListNode } from './listNode.js';
+import { TreeNode } from './treeNode.js';
+import { GraphNode } from './graphNode.js';
 //import React from 'react';
 //import { map } from './lib/';
 //const Visualizer = require('./visualizer.js');
@@ -131,7 +134,7 @@ export function handleRightClicked() {
 const userArr = [1, 2, 3, 10, 20, 30 , 40, 50, 60, 100, 10, 1, 1, 1,1,1,11,1,1,1,1,11,1,1];
 const myArr = [40, 20 , 10000];
 const mySet = new Set([1, 2, 3, 5, 6]);
-const myLinkedList = {
+/*const myLinkedList = {
     value:1,
     next:{
         value:2, 
@@ -142,45 +145,16 @@ const myLinkedList = {
             }
         }
     }
-}
+}*/
+const myLinkedList = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4))));
+console.log("myLinkedList", myLinkedList);
 let hashmap = {
     "key":"value",
     1:10,
     23:4
 }
-const tree = {
-    value: "A",
-    children: [
-        {
-            value:"B",
-            children: [
-                {value: "D"}, 
-                {value: "T"}
-            ]
-        }, 
-        {
-            value: "F",
-            children: [
-                {value: "G"},
-                {value: "H"},
-                {value: "I"},
-                {value: "J"},
-                {value: "K",
-                    children: [
-                        {value: "R"},
-                        {   
-                            value: "Q",
-                            children: [{value:"W"}]
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-}
-const graph = {
-    value: "A",
-    neighbors: [
+const tree = new TreeNode("A", new TreeNode("B", new TreeNode("D"), new TreeNode("T")), new TreeNode("F", new TreeNode("G"), new TreeNode("H"), new TreeNode("I"), new TreeNode("J"), new TreeNode("K", new TreeNode("R"), new TreeNode("Q", new TreeNode("W")))));
+/*const graph = new GraphNode("A", [
         {
             value: "B",
             neighbors: [
@@ -207,13 +181,18 @@ const graph = {
         {value:"K"},
         {value:"L"}
     ]
-}
-const graph2 = {
-    value: "A",
-    neighbors: [
-        {value:"B"}
-    ]
-}
+);*/
+const graph = new GraphNode("A", [
+    new GraphNode("B", [new GraphNode("D", [new GraphNode("G")])]),
+    new GraphNode("C", [new GraphNode("E"), new GraphNode("F"), new GraphNode("A")]),
+    new GraphNode("G"),
+    new GraphNode("H"),
+    new GraphNode("I"),
+    new GraphNode("J"),
+    new GraphNode("K"),
+    new GraphNode("L")
+]);
+const graph2 = new GraphNode("A", [new GraphNode("B")]);
 const matrix = [[0, 1, 2, 3], [4, 4, 4, 4], [5, 4, 3, 2]];
 //visualizer.visualize('userArr', userArr);
 //progressBar.visualizeBar(snapshots.length);

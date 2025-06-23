@@ -180,7 +180,7 @@ export class ProgressBar {
             });
             valueMap.set(key, valueList);
         });
-        console.log(valueMap);
+        console.log('valueMap', valueMap);
         return valueMap;
     }
     updateProgressBar(clickedX) {

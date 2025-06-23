@@ -223,57 +223,12 @@ const snapshotCode = `
         if (loopTypes.has(line.type)) {
             // For all loops
             traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.body, 'body');
-        } /*else if (line.type === 'IfStatement') {
-            // For if/else blocks
-            traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.consequent, 'consequent');
-            if (line.alternate) {
-                traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.alternate, 'alternate');
-            }
-        }*/
+        }
     }
-    /*
-    const returnStatement = `console.log(snapshots);`;
-    bodyArr.push(acorn.parse(returnStatement));
-    const returnStatementNode = {
-        type: 'ReturnStatement',
-        argument: {
-          type: 'Identifier',
-          name: 'snapshots'
-        }
-    };
-    bodyArr.push(returnStatementNode);
-    const iifeExpression = {
-        type: 'CallExpression',
-        callee: {
-            type: 'FunctionExpression',
-            id: null,
-            params: [],
-            body: {
-                type: 'BlockStatement',
-                body: bodyArr 
-            }
-        },
-        arguments: []
-    };
-    const newStatement = {
-        type: 'ExpressionStatement',
-        expression: iifeExpression
-    };*/
-    /*if (node.type === 'IfStatement') {
-        node.consequent.body = bodyArr;
-        // Handle alternate if it exists
-        if (node.alternate && node.alternate.type === 'BlockStatement') {
-            // Process alternate branch similarly
-            // ... similar logic for alternate
-        }
-    } else {
-        // For loops
-        node.body.body = bodyArr;
-    }*/
    node.body.body = bodyArr;
   }
 
-  function traverseAndInjectSnapshots(node, parentNode = null, parentKey = null) {
+  /*function traverseAndInjectSnapshots(node, parentNode = null, parentKey = null) {
     const snapshotCode = `
         //__PAUSE__//
         
@@ -331,7 +286,7 @@ const snapshotCode = `
                 ast = newBlock; 
             }
         }
-    }
+    }*
   
     // Recursively traverse child nodes
     for (const key in node) {
@@ -346,9 +301,9 @@ const snapshotCode = `
         }
       }
     }
-  }
+  }*/
 
-function executeCodeWithPauses(instrumentedCode) {
+/*function executeCodeWithPauses(instrumentedCode) {
     const context = { 
       // ... your sandbox context
     };
@@ -363,7 +318,7 @@ function executeCodeWithPauses(instrumentedCode) {
   
       resolve();
     });
-  }
+  }*/
 
 
 
