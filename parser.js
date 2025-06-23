@@ -106,6 +106,45 @@ const snapshotCode = `
     console.log(acorn.parse(originalVars));
     bodyArr.push(acorn.parse(originalVars));
 
+    const originalTypeDefinitions = `
+        class ListNode {
+            /**
+             * Creates an instance of ListNode.
+             * @param {any} val - The value to store in the node.
+             * @param {ListNode | null} next - A reference to the next node in the list, or null if it's the last node.
+             */
+            constructor(val, next = null) {
+                this.val = val;
+                this.next = next;
+            }
+        }
+        class TreeNode {
+            /**
+             * Creates an instance of TreeNode.
+             * @param {any} val - The value to store in the node.
+             * @param {TreeNode | null} left - A reference to the left child node, or null if none.
+             * @param {TreeNode | null} right - A reference to the right child node, or null if none.
+             */
+            constructor(val, left = null, right = null) {
+                this.val = val;
+                this.left = left;
+                this.right = right;
+            }
+        }
+        class GraphNode {
+            /**
+             * Creates an instance of TreeNode.
+             * @param {any} val - The value to store in the node.
+             * @param {GraphNode | null} neighbors
+             */
+            constructor(val, neighbors = []) {
+                this.val = val;
+                this.neighbors = neighbors;
+            }
+        }
+    `;
+    bodyArr.push(acorn.parse(originalTypeDefinitions));
+
     console.log('currNode', node);
     let currBody;
     if (node.body.body) {
