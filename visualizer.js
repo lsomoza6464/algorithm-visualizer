@@ -718,11 +718,10 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                     if (!values) {
                         return 'white'
                     }
-                    console.log("here27", values, i)
+                    //console.log("here27", values, i)
                     for (let j = 0; j < Math.min(4, values.length); j++) {
-                        console.log("here28", values[j], i, data[i], values[j] != null, "val" in values[j], values[j].val == data[i]);
+                        //console.log("here28", values[j], i, data[i], values[j] != null, "val" in values[j], values[j].val == data[i]);
                         if (values[j] != null && "val" in values[j] && values[j].val == data[i]) {
-                            console.log('colors', values, colors);
                             return colors[j];
                         }
                     }
