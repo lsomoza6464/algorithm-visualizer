@@ -78,6 +78,12 @@ const myLinkedList = {
         }
     }
 }
+let curr = myLinkedList;
+while (curr != null) {
+    curr = curr.next;
+}
+const tree = new TreeNode("A", new TreeNode("B", new TreeNode("D"), new TreeNode("T")), new TreeNode("F", new TreeNode("G"), new TreeNode("H"), new TreeNode("I"), new TreeNode("J"), new TreeNode("K", new TreeNode("R"), new TreeNode("Q", new TreeNode("W")))));
+const left = tree.left;
 const graph = new GraphNode("A", [
     new GraphNode("B", [new GraphNode("D", [new GraphNode("G")])]),
     new GraphNode("C", [new GraphNode("E"), new GraphNode("F"), new GraphNode("A")]),
@@ -88,17 +94,16 @@ const graph = new GraphNode("A", [
     new GraphNode("K"),
     new GraphNode("L")
 ]);
-let curr = myLinkedList;
             </textarea>
             <br>
             <label for="included-variables">Enter the variables that you want to visualize here:</label>
             <br>
-            <input id="included-variables" style="min-width:350px" value="arr, target, start, end, middle, myLinkedList, graph, curr">
+            <input id="included-variables" style="min-width:350px" value="arr, target, start, end, middle, myLinkedList, curr, tree, left, graph">
             <br>
             <br>
             <label for="selected-variables">Enter the target variables and their data structures that you want to visualize here:</label>
             <br>
-            <input id="selected-variables" style='min-width: 350px' value="arr:start, end, middle; myLinkedList:curr">
+            <input id="selected-variables" style='min-width: 350px' value="arr:start, end, middle; myLinkedList:curr; tree:left">
             <br>
             <br>
             <input type="submit" value="Submit your code"/>

@@ -44,7 +44,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         } else if(value instanceof ListNode || "next" in value ) {
             this.visualizeLinkedList(name, value, false, values)
         } else if(value instanceof TreeNode || "children" in value || "left" in value || "right" in value) {
-            this.visualizeTree(name, value);
+            this.visualizeTree(name, value, values);
         } else if(value instanceof GraphNode || "neighbors" in value) {
             this.visualizeGraph(name, value, false);
         }
@@ -239,14 +239,14 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         this.drawDoubleArr(hashKeys, hashValues);
     }
   
-    visualizeTree(name, root) { //create a 2d array that is full of each node's value and the amount of leaf nodes that it has (find
+    visualizeTree(name, root, values = []) { //create a 2d array that is full of each node's value and the amount of leaf nodes that it has (find
     //the leaf nodes through a recursive function that takes the amount of leaf nodes of each of its children then use the amount of leaf nodes to determine the spacing of the nodes)
         //node attributes
-        console.log("root", root);
         const circleDiameter = 50;
         const circleRadius = circleDiameter / 2;
         const marginSize = 10;
         const strokeSize = this.strokeSize;
+        const colors = this.colors;
         
         //tree attributes
         const seperationSize = 10;
@@ -263,7 +263,6 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             .attr('class', 'svgTree')
             .attr('width', treeWidth)
             .attr('height', treeHeight);
-        console.log("nodeMatrix", nodeMatrix)
         drawNodeCircles(nodeMatrix);
         drawNodeArrows(nodeMatrix);
         
@@ -296,7 +295,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                 }
         
                 const totalLeafs = previousLeafs[depth] + leafNodes / 2;
-                console.log("nodeMatrix", nodeMatrix);
+                //console.log("nodeMatrix", nodeMatrix);
                 nodeMatrix[depth].push({
                     val: node.val,
                     childAmt: childAmt,
@@ -346,6 +345,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         }
   
         function drawNodeCircles(nodeMatrix){
+            console.log("nodeMatrix", nodeMatrix);
             for(let row = 0; row < treeDepth; row++){
                 let leafNodes = 0;
                 svg.selectAll('.circle' + row)
@@ -356,7 +356,20 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                         .attr('cy', function(d) { return d.yVal; })
                         .attr('cx', function(d) { return d.xVal; })
                         .attr('r', circleRadius)
-                        .attr('fill', 'white')
+                        .attr('fill', function (d, i) {
+                            if (!values) {
+                                return 'white'
+                            }
+                            console.log("here27", values, i)
+                            for (let j = 0; j < Math.min(4, values.length); j++) {
+                                //console.log("here28", values[j], i, nodeMatrix[row][i], values[j] != null, "val" in values[j], values[j].val == nodeMatrix[row][i].val);
+                                console.log("colors", colors);
+                                if (values[j] != null && "val" in values[j] && values[j].val == nodeMatrix[row][i].val) {
+                                    return colors[j];
+                                }
+                            }
+                            return 'white';
+                        })
                         .attr('stroke', 'black')
                         .attr('stroke-width', strokeSize);
                 leafNodes = 0;
