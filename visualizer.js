@@ -50,17 +50,6 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         }
     }
 
-    /*visualizeWithValues(name, value, values) {
-        if (typeof value != 'object') {
-            this.visualizeVariable(name, value);
-        } else if(value instanceof Array) {
-            console.log('here5', value, values)
-            this.visualizeArr(name, value, values);
-        } else if(value instanceof Set) {
-            this.visualizeSet(name, value, values);
-        }
-    }*/
-
     visualizeVariable(name, value) {
         this.container.append('div')
             .style("margin-left", this.marginSize + 'px')
@@ -484,18 +473,18 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             .attr('width', 800)
             .attr('height', 1000);
         populateNodeEdgeArr(startNode);
-        drawGraph(nodeArr, edgeArr);
+        drawGraph(nodeArr, edgeArr, true);
 
         function drawGraph(nodeArr, edgeArr, fast = false){
-            if(fast){
+            if (fast){
                 const simulation = d3.forceSimulation(nodeArr)
                     .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
                     .force("charge", d3.forceManyBody().strength(-300))
                     .force("center", d3.forceCenter(0, 0))
-                    // Removed collision force for speed
-                    .alphaDecay(0.2) // Much faster decay
-                    .velocityDecay(0.6) // Higher velocity decay
-                    .alphaMin(0.01) // Higher minimum alpha to stop earlier
+                    .force("collide", d3.forceCollide().radius(circleRadius + 5))
+                    .alphaDecay(0.05) // Default is 0.0228, 0.2 is very fast
+                    .velocityDecay(0.45) // Default is 0.4, 0.6 is very fast
+                    .alphaMin(0.03) // Default is 0.001, 0.01 is fast
                     .on("end", () => {
                     // Step 2: Extract the node positions
                     const nodePositions = nodeArr.map(node => ({
