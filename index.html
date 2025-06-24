@@ -94,7 +94,10 @@ const graph = new GraphNode("A", [
     new GraphNode("K"),
     new GraphNode("L")
 ]);
-const neighbor = graph.neighbors[0];
+let neighbor = graph;
+while (neighbor != null) {
+    neighbor = neighbor.neighbors[0];
+}
             </textarea>
             <br>
             <label for="included-variables">Enter the variables that you want to visualize here:</label>

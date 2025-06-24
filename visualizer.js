@@ -46,7 +46,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         } else if(value instanceof TreeNode || "children" in value || "left" in value || "right" in value) {
             this.visualizeTree(name, value, values);
         } else if(value instanceof GraphNode || "neighbors" in value) {
-            this.visualizeGraph(name, value, false, values);
+            this.visualizeGraph(name, value, true, values);
         }
     }
 
@@ -577,8 +577,10 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                             }
                             console.log("here27", values, i)
                             for (let j = 0; j < Math.min(4, values.length); j++) {
-                                console.log("here28", values[j], i, nodePositions[i], values[j] != null, "val" in values[j], values[j].val == nodePositions[i].val);
-                                console.log("colors", colors);
+                                /*if (values[j] != null) {
+                                    console.log("here28", values[j], i, nodePositions[i], values[j] != null, "val" in values[j], values[j].val == nodePositions[i].val);
+                                }
+                                console.log("colors", colors);*/
                                 if (values[j] != null && "val" in values[j] && values[j].val == nodePositions[i].val) {
                                     return colors[j];
                                 }
