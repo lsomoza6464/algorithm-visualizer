@@ -94,16 +94,17 @@ const graph = new GraphNode("A", [
     new GraphNode("K"),
     new GraphNode("L")
 ]);
+const neighbor = graph.neighbors[0];
             </textarea>
             <br>
             <label for="included-variables">Enter the variables that you want to visualize here:</label>
             <br>
-            <input id="included-variables" style="min-width:350px" value="arr, target, start, end, middle, myLinkedList, curr, tree, left, graph">
+            <input id="included-variables" style="min-width:350px" value="arr, target, start, end, middle, myLinkedList, curr, tree, left, graph, neighbor">
             <br>
             <br>
             <label for="selected-variables">Enter the target variables and their data structures that you want to visualize here:</label>
             <br>
-            <input id="selected-variables" style='min-width: 350px' value="arr:start, end, middle; myLinkedList:curr; tree:left">
+            <input id="selected-variables" style='min-width: 350px' value="arr:start, end, middle; myLinkedList:curr; tree:left; graph:neighbor">
             <br>
             <br>
             <input type="submit" value="Submit your code"/>

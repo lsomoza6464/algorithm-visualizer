@@ -46,7 +46,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         } else if(value instanceof TreeNode || "children" in value || "left" in value || "right" in value) {
             this.visualizeTree(name, value, values);
         } else if(value instanceof GraphNode || "neighbors" in value) {
-            this.visualizeGraph(name, value, false);
+            this.visualizeGraph(name, value, false, values);
         }
     }
 
@@ -360,11 +360,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                             if (!values) {
                                 return 'white'
                             }
-                            console.log("here27", values, i)
-                            for (let j = 0; j < Math.min(4, values.length); j++) {
-                                //console.log("here28", values[j], i, nodeMatrix[row][i], values[j] != null, "val" in values[j], values[j].val == nodeMatrix[row][i].val);
-                                console.log("colors", colors);
-                                if (values[j] != null && "val" in values[j] && values[j].val == nodeMatrix[row][i].val) {
+                            for (let j = 0; j < Math.min(4, values.length); j++) {if (values[j] != null && "val" in values[j] && values[j].val == nodeMatrix[row][i].val) {
                                     return colors[j];
                                 }
                             }
@@ -463,12 +459,14 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
         }
     }
 
-    visualizeGraph(name, startNode, directional = true) { //questionable name "rootNode"
+    visualizeGraph(name, startNode, directional = true, values = []) { //questionable name "rootNode"
         //node attributes
         const circleDiameter = 50;
         const circleRadius = circleDiameter / 2;
         const marginSize = 10;
         const strokeSize = this.strokeSize;
+        const colors = this.colors;
+        console.log("values1", values);
         
         //graph attributes
         const seperationSize = 10; //need to make larger probably
@@ -485,7 +483,6 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             .attr('class', 'svgGraph')
             .attr('width', 800)
             .attr('height', 1000);
-        
         populateNodeEdgeArr(startNode);
         drawGraph(nodeArr, edgeArr);
 
@@ -565,6 +562,7 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
             }
             
             function drawNodes(nodePositions) {
+                console.log("nodepositions", nodePositions);
                 svg.selectAll('circle')
                     .data(nodePositions)
                     .enter()
@@ -573,7 +571,20 @@ export class Visualizer { //-- may want to switch to typescript, also lots of pa
                         .attr('cy', (d, i) => nodePositions[i].y)
                         .attr('cx', (d, i) => nodePositions[i].x)
                         .attr('r', circleRadius)
-                        .attr('fill', 'white')
+                        .attr('fill', function (d, i) {
+                            if (!values) {
+                                return 'white'
+                            }
+                            console.log("here27", values, i)
+                            for (let j = 0; j < Math.min(4, values.length); j++) {
+                                console.log("here28", values[j], i, nodePositions[i], values[j] != null, "val" in values[j], values[j].val == nodePositions[i].val);
+                                console.log("colors", colors);
+                                if (values[j] != null && "val" in values[j] && values[j].val == nodePositions[i].val) {
+                                    return colors[j];
+                                }
+                            }
+                            return 'white';
+                        })
                         .attr('stroke', 'black')
                         .attr('stroke-width', strokeSize);
                 svg.selectAll('text')
