@@ -54,8 +54,11 @@ console.log(generatedCode);
 
 function handleFormSubmit(event) {
     event.preventDefault();
-    const userCodeTextarea = document.getElementById('user-code-textarea');
-    const userCode = userCodeTextarea.value;
+    const userCodeTextarea = document.getElementById('user-code-hidden-input');
+    //const userCode = userCodeTextarea;
+    //console.log('uCode', userCode);
+    const userCode = window.getMonacoCode(); 
+    console.log(userCode);
     const selectedMap = getSelectedMap()
     console.log(selectedMap);
     const selectedVariables = getSelectedVariables(selectedMap);
