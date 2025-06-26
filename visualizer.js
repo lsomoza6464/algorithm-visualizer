@@ -1,22 +1,71 @@
-export class Visualizer {
+import { GraphNode } from "./graphNode.js";
+import { ListNode } from "./listNode.js";
+import { TreeNode } from "./treeNode.js";
+
+export class Visualizer { //-- may want to switch to typescript, also lots of parameters which is very confusing, maybe include var names in the 
     constructor(width, height){
         this.container = d3.select('#visualization-container')
-            .attr('width', width)
+            .attr('width', width) //--not actually the minimum width, the container shrinks and expands with contents
             .attr('height', height);
         this.strokeSize = 2.5;
+        this.marginSize = 10;
+        this.colors = ['red', 'yellow', 'green', 'blue'];
+        this.values = [];
     }
   
     //progromatically add svgs into the div as new data structures are added so you do not have to deal with structure counters
     //The first element is a little smaller of a separator than the other elements, not a big issue but maybe look into
-  
+
+    clear() {
+        this.container.html('');
+    }
+
+    visualizeAll(snapshotArr, selectorMap) {
+        console.log('here3', snapshotArr, selectorMap);
+        for (let i = 0; i < snapshotArr.length; i++) {
+            if (selectorMap.has(snapshotArr[i].name)) {
+                console.log('here6', selectorMap.get(snapshotArr[i].name));
+                this.visualize(snapshotArr[i].name, snapshotArr[i].value, selectorMap.get(snapshotArr[i].name));
+            } else {
+                this.visualize(snapshotArr[i].name, snapshotArr[i].value);
+            }
+
+            //this.visualize(snapshotArr[i].name, snapshotArr[i].value, selectorMap.get(snapshotArr[i].name));
+        }
+    }
+
+    visualize(name, value, values=[]) {
+        if (typeof value != 'object') {
+            this.visualizeVariable(name, value);
+        } else if(value instanceof Array) {
+            this.visualizeArr(name, value, values);
+        } else if(value instanceof Set) {
+            this.visualizeSet(name, value);
+        } else if(value instanceof ListNode || "next" in value ) {
+            this.visualizeLinkedList(name, value, false, values)
+        } else if(value instanceof TreeNode || "children" in value || "left" in value || "right" in value) {
+            this.visualizeTree(name, value, values);
+        } else if(value instanceof GraphNode || "neighbors" in value) {
+            this.visualizeGraph(name, value, true, values);
+        }
+    }
+
+    visualizeVariable(name, value) {
+        this.container.append('div')
+            .style("margin-left", this.marginSize + 'px')
+            .style('margin-top', '10px')
+            .text(`${name}: ${value}`);
+    }
+
     visualizeVariableArr(names, values) {
         this.drawDoubleArr(names, values);
     }
 
-    visualizeArr(name, arr){
+    visualizeArr(name, arr, values){
+        //console.log('here-1', name, arr, 'vals:', values);
         const squareWidth = 50;
         const marginSize = 10;
-        const strokeSize = this.strokeSize
+        const strokeSize = this.strokeSize;
         const width = arr.length * squareWidth + strokeSize + marginSize * 2;
         const height = squareWidth + strokeSize + marginSize;
         this.container.append('br');
@@ -28,16 +77,62 @@ export class Visualizer {
             .attr('height', height);
             //svg.append('text').text('arr');
             //svg.append('br');
-  
-        this.drawSquares(svg, arr, squareWidth, marginSize, strokeSize);
+        console.log("vals2:", values)
+        this.drawSquares(svg, arr, squareWidth, marginSize, strokeSize, 0, 0, 'rect', values);
         this.writeText(svg, arr, squareWidth, marginSize, strokeSize);
     }
+
+    visualizeMatrix(name, matrix, values) { //-- need better name than values (I think these are selected values)
+        console.log('init matrix: name:', name, 'contents:', matrix, 'values:', values);
+        const squareWidth = 50;
+        const marginSize = 10;
+        const strokeSize = this.strokeSize;
+        const width = matrix[0].length * squareWidth + strokeSize + marginSize * 2;
+        const height = matrix.length * squareWidth + strokeSize + marginSize; //assuming that this has the same size column arrays
+        this.container.append('br'); //append line break?
+        this.writeVariableName(name, marginSize);
+        const svg = this.container.append('svg')
+        .attr('class', 'svgMatrix') // Changed class name for better semantics
+        .attr('width', width)
+        .attr('height', height);
+
+        // Bind matrix data to 'g' elements, each representing a row
+        const rows = svg.selectAll(".matrix-row") // Select elements with class 'matrix-row'
+            .data(matrix) // Bind the outer array (matrix)
+            .enter()
+            .append("g") // Append a group 'g' for each row
+            .attr("class", "matrix-row")
+            // Use transform to position each row group vertically
+            .attr("transform", (d, rowIndex) => `translate(${marginSize}, ${marginSize + rowIndex * squareWidth})`);
+            // The translate applies to the entire group, so elements inside
+            // can be positioned relative to their group's top-left.
+
+        // Now, for each 'g' (row group), draw the squares and text
+        rows.each((rowData, rowIndex, nodes) => {
+            const currentRowGroup = d3.select(nodes[rowIndex]); // Select the current 'g' element
+
+            // Call drawSquares and writeText using the currentRowGroup as the selection.
+            // The yStart parameter can now be 0, as the row's vertical position
+            // is handled by the 'transform' on the group.
+            this.drawSquares(currentRowGroup, rowData, squareWidth, 0, strokeSize, 0, 0, 'rect', values); // marginSize is now applied by the group's transform. Pass 0 for internal margin
+            this.writeText(currentRowGroup, rowData, squareWidth, 0, strokeSize, 0, 0, ".valueText"); // Same for text
+        });
+        /*const svg = this.container.append('svg')
+            .attr('class', 'svgArr')
+            .attr('width', width)
+            .attr('height', height);
+        for (let i = 0; i < matrix.length; i++) {
+            console.log('height:', squareWidth * i);
+            this.drawSquares(svg, matrix[i], squareWidth, marginSize, strokeSize, 0, squareWidth * i, 'rect', values);
+            this.writeText(svg, matrix[i], squareWidth, marginSize, strokeSize, 0, squareWidth * i, ".valueText");
+        }*/
+    }
   
-    visualizeLinkedList(name, head, doubly = false){
+    visualizeLinkedList(name, head, doubly = false, values = []){
         let list = [];
         let currNode = head;
         while(currNode != null){ //or while(currNode.next){}
-            list.push(currNode.value);
+            list.push(currNode.val);
             currNode = currNode.next;
         }
 
@@ -51,6 +146,7 @@ export class Visualizer {
         const arrowLength = 20;
         const height = circleDiameter + strokeSize + marginSize;
         const width = (circleDiameter + arrowLength) * list.length + strokeSize + marginSize * 2;
+        const colors = this.colors;
 
 
         this.container.append('br');
@@ -98,7 +194,7 @@ export class Visualizer {
                     .attr("stroke-width", 1)
                     .attr("marker-end", "url(#arrow-head)");
         }
-        this.drawCircles(svg, list, circleDiameter, marginSize, strokeSize, arrowLength);
+        this.drawCircles(svg, list, circleDiameter, marginSize, strokeSize, arrowLength, values);
         this.writeText(svg, list, circleDiameter, marginSize, strokeSize, arrowLength);
     }
   
@@ -132,13 +228,14 @@ export class Visualizer {
         this.drawDoubleArr(hashKeys, hashValues);
     }
   
-    visualizeTree(name, root) { //create a 2d array that is full of each node's value and the amount of leaf nodes that it has (find
+    visualizeTree(name, root, values = []) { //create a 2d array that is full of each node's value and the amount of leaf nodes that it has (find
     //the leaf nodes through a recursive function that takes the amount of leaf nodes of each of its children then use the amount of leaf nodes to determine the spacing of the nodes)
         //node attributes
         const circleDiameter = 50;
         const circleRadius = circleDiameter / 2;
         const marginSize = 10;
         const strokeSize = this.strokeSize;
+        const colors = this.colors;
         
         //tree attributes
         const seperationSize = 10;
@@ -155,11 +252,56 @@ export class Visualizer {
             .attr('class', 'svgTree')
             .attr('width', treeWidth)
             .attr('height', treeHeight);
-  
         drawNodeCircles(nodeMatrix);
         drawNodeArrows(nodeMatrix);
         
         function populateNodeMatrix(node){
+            let previousLeafs = new Array(treeDepth);
+            for(let i = 0; i < treeDepth; i++){
+                nodeMatrix.push(new Array());
+                previousLeafs[i] = 0;
+            }
+            recurseNodes(node, 0);
+        
+            function recurseNodes(node, depth){
+                if (!node) return 0;
+                let leafNodes = 0;
+                let childAmt = 0;
+                let leftLeafs = 0, rightLeafs = 0;
+        
+                if(node.left || node.right){
+                    if(node.left){
+                        leftLeafs = recurseNodes(node.left, depth + 1);
+                        childAmt++;
+                    }
+                    if(node.right){
+                        rightLeafs = recurseNodes(node.right, depth + 1);
+                        childAmt++;
+                    }
+                    leafNodes = leftLeafs + rightLeafs;
+                } else {
+                    leafNodes = 1;
+                }
+        
+                const totalLeafs = previousLeafs[depth] + leafNodes / 2;
+                //console.log("nodeMatrix", nodeMatrix);
+                nodeMatrix[depth].push({
+                    val: node.val,
+                    childAmt: childAmt,
+                    xVal: strokeSize/2 + (circleDiameter + seperationSize) * (totalLeafs) + marginSize,
+                    yVal: marginSize + circleRadius + (seperationSize + circleDiameter) * depth
+                });
+                previousLeafs[depth] += leafNodes;
+                if(!node.left && !node.right){
+                    for(let i = depth + 1; i < treeDepth; i++){
+                        previousLeafs[i] += 1;
+                    }
+                }
+                return leafNodes;
+            }
+        }
+        
+        function populateMultiNodeMatrix(node){
             let previousLeafs = new Array(treeDepth);
             for(let i = 0; i < treeDepth; i++){
                 nodeMatrix.push(new Array());
@@ -180,7 +322,7 @@ export class Visualizer {
                 }
                 const totalLeafs = previousLeafs[depth] + leafNodes / 2;
                 //console.log(node.value + ", " + previousLeafs[depth] + ", " + leafNodes + ", " + totalLeafs);
-                nodeMatrix[depth].push({"value": node.value, "childAmt": childAmt, "xVal": strokeSize/2 + (circleDiameter + seperationSize) * (totalLeafs) + marginSize, "yVal": marginSize + circleRadius + (seperationSize + circleDiameter) *depth});//rewrite later as points instead of arrays
+                nodeMatrix[depth].push({"value": node.val, "childAmt": childAmt, "xVal": strokeSize/2 + (circleDiameter + seperationSize) * (totalLeafs) + marginSize, "yVal": marginSize + circleRadius + (seperationSize + circleDiameter) *depth});//rewrite later as points instead of arrays
                 previousLeafs[depth] += leafNodes;
                 if(!node.children){
                     for(let i = depth + 1; i < treeDepth; i++){//a little inefficient, maybe want to fix
@@ -192,6 +334,7 @@ export class Visualizer {
         }
   
         function drawNodeCircles(nodeMatrix){
+            console.log("nodeMatrix", nodeMatrix);
             for(let row = 0; row < treeDepth; row++){
                 let leafNodes = 0;
                 svg.selectAll('.circle' + row)
@@ -202,7 +345,16 @@ export class Visualizer {
                         .attr('cy', function(d) { return d.yVal; })
                         .attr('cx', function(d) { return d.xVal; })
                         .attr('r', circleRadius)
-                        .attr('fill', 'white')
+                        .attr('fill', function (d, i) {
+                            if (!values) {
+                                return 'white'
+                            }
+                            for (let j = 0; j < Math.min(4, values.length); j++) {if (values[j] != null && "val" in values[j] && values[j].val == nodeMatrix[row][i].val) {
+                                    return colors[j];
+                                }
+                            }
+                            return 'white';
+                        })
                         .attr('stroke', 'black')
                         .attr('stroke-width', strokeSize);
                 leafNodes = 0;
@@ -214,7 +366,7 @@ export class Visualizer {
                         .attr('y', function(d) { return d.yVal})
                         .attr('x', function(d) { return d.xVal; })
                         .attr('text-anchor', 'middle')
-                        .text(d => d.value);
+                        .text(d => d.val);
             }
         }
 
@@ -245,7 +397,7 @@ export class Visualizer {
                             .attr('y1', currNode.yVal + (y2 - currNode.yVal)/reductionRatio)
                             .attr('x2', x2 - (x2 - currNode.xVal)/reductionRatio)
                             .attr('y2', y2 - (y2 - currNode.yVal)/reductionRatio)
-                            .attr("class", currNode.value)
+                            .attr("class", currNode.val)
                             .attr("stroke", "black")
                             .attr("stroke-width", 1)
                             .attr("marker-end", "url(#arrow-head)");
@@ -255,7 +407,7 @@ export class Visualizer {
             }
         }
   
-        function findtreeDepth(node){//maybe rename to treeDepth
+        function findmultitreeDepth(node){//maybe rename to treeDepth
             let maxDepth = 1;
             recurseNodes(node, 1);
             return maxDepth;
@@ -272,14 +424,38 @@ export class Visualizer {
                 return;
             }
         }
+        function findtreeDepth(node) {
+            if (!node) return 0;  // Handle null node case
+            let maxDepth = 1;
+            recurseNodes(node, 1);
+            return maxDepth;
+        
+            function recurseNodes(node, depth) {
+                if (!node) return;  // Base case for null nodes
+                
+                if (depth > maxDepth) {
+                    maxDepth = depth;
+                }
+                
+                // Recurse on left and right children if they exist
+                if (node.left) {
+                    recurseNodes(node.left, depth + 1);
+                }
+                if (node.right) {
+                    recurseNodes(node.right, depth + 1);
+                }
+            }
+        }
     }
 
-    visualizeGraph(name, startNode, directional = true) { //questionable name "rootNode"
+    visualizeGraph(name, startNode, directional = true, values = []) { //questionable name "rootNode"
         //node attributes
         const circleDiameter = 50;
         const circleRadius = circleDiameter / 2;
         const marginSize = 10;
         const strokeSize = this.strokeSize;
+        const colors = this.colors;
+        console.log("values1", values);
         
         //graph attributes
         const seperationSize = 10; //need to make larger probably
@@ -296,23 +472,26 @@ export class Visualizer {
             .attr('class', 'svgGraph')
             .attr('width', 800)
             .attr('height', 1000);
-        
         populateNodeEdgeArr(startNode);
-        drawGraph(nodeArr, edgeArr);
+        drawGraph(nodeArr, edgeArr, true);
 
-        function drawGraph(nodeArr, edgeArr){
-            const simulation = d3.forceSimulation(nodeArr)
-                .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
-                .force("charge", d3.forceManyBody().strength(-300))
-                .force("center", d3.forceCenter(0, 0))
-                .force("collide", d3.forceCollide().radius(circleRadius + 5)) // Add collision force
-                .on("end", () => {
+        function drawGraph(nodeArr, edgeArr, fast = false){
+            if (fast){
+                const simulation = d3.forceSimulation(nodeArr)
+                    .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
+                    .force("charge", d3.forceManyBody().strength(-300))
+                    .force("center", d3.forceCenter(0, 0))
+                    .force("collide", d3.forceCollide().radius(circleRadius + 5))
+                    .alphaDecay(0.05) // Default is 0.0228, 0.2 is very fast
+                    .velocityDecay(0.45) // Default is 0.4, 0.6 is very fast
+                    .alphaMin(0.03) // Default is 0.001, 0.01 is fast
+                    .on("end", () => {
                     // Step 2: Extract the node positions
                     const nodePositions = nodeArr.map(node => ({
                         id: node.id,
                         x: node.x,
                         y: node.y,
-                        value: node.value
+                        val: node.val
                     }));
                     centerGraph(nodePositions);
 
@@ -324,7 +503,33 @@ export class Visualizer {
                     // Step 3: Draw the static graph using the extracted positions
                     drawNodes(nodePositions);
                     drawEdges(nodePositionsTable, edgeArr);
-            });
+                });
+            } else {
+                const simulation = d3.forceSimulation(nodeArr)
+                    .force("link", d3.forceLink(edgeArr).id(d => d.id).distance(100))
+                    .force("charge", d3.forceManyBody().strength(-300))
+                    .force("center", d3.forceCenter(0, 0))
+                    .force("collide", d3.forceCollide().radius(circleRadius + 5))
+                    .on("end", () => {
+                    // Step 2: Extract the node positions
+                    const nodePositions = nodeArr.map(node => ({
+                        id: node.id,
+                        x: node.x,
+                        y: node.y,
+                        val: node.val
+                    }));
+                    centerGraph(nodePositions);
+
+
+                    const nodePositionsTable = {};
+                    for(let i = 0; i < nodePositions.length; i++) {
+                        nodePositionsTable[nodePositions[i].id] = nodePositions[i];
+                    }
+                    // Step 3: Draw the static graph using the extracted positions
+                    drawNodes(nodePositions);
+                    drawEdges(nodePositionsTable, edgeArr);
+                });
+            }
 
             function getMaxMin(nodePositions) {
                 for(let i = 0; i < nodePositions.length; i++) {
@@ -346,6 +551,7 @@ export class Visualizer {
             }
             
             function drawNodes(nodePositions) {
+                console.log("nodepositions", nodePositions);
                 svg.selectAll('circle')
                     .data(nodePositions)
                     .enter()
@@ -354,7 +560,22 @@ export class Visualizer {
                         .attr('cy', (d, i) => nodePositions[i].y)
                         .attr('cx', (d, i) => nodePositions[i].x)
                         .attr('r', circleRadius)
-                        .attr('fill', 'white')
+                        .attr('fill', function (d, i) {
+                            if (!values) {
+                                return 'white'
+                            }
+                            console.log("here27", values, i)
+                            for (let j = 0; j < Math.min(4, values.length); j++) {
+                                /*if (values[j] != null) {
+                                    console.log("here28", values[j], i, nodePositions[i], values[j] != null, "val" in values[j], values[j].val == nodePositions[i].val);
+                                }
+                                console.log("colors", colors);*/
+                                if (values[j] != null && "val" in values[j] && values[j].val == nodePositions[i].val) {
+                                    return colors[j];
+                                }
+                            }
+                            return 'white';
+                        })
                         .attr('stroke', 'black')
                         .attr('stroke-width', strokeSize);
                 svg.selectAll('text')
@@ -365,7 +586,7 @@ export class Visualizer {
                         .attr('y', (d, i) => nodePositions[i].y)
                         .attr('x', (d, i) => nodePositions[i].x)
                         .attr('text-anchor', 'middle') //text anchor middle vertically as well
-                        .text((d, i) => nodePositions[i].value);
+                        .text((d, i) => nodePositions[i].val);
                     
             }
             function drawEdges(nodePositionsTable, edgeArr) {
@@ -441,7 +662,7 @@ export class Visualizer {
             }
             function addNode(node){
                 if(!node.id){
-                    node.id = node.value;
+                    node.id = node.val;
                 }
                 if(!nodeSet.has(node.id)) {
                     nodeSet.add(node.id);
@@ -455,18 +676,30 @@ export class Visualizer {
 
     }
   
-    drawSquares(svg, data, squareWidth, marginSize, strokeSize, curveAmount = 0, yStart = 0, selectorType="rect"){
-        //console.log(data)
+    drawSquares(svg, data, squareWidth, marginSize, strokeSize, curveAmount = 0, yStart = 0, selectorType="rect", values = []){
+        console.log('here8', yStart)
+        const colors = this.colors;
         svg.selectAll(selectorType)
         .data(data)
         .enter()
         .append('rect')
             .attr('id', (d, i) => "square-" + i) //or function(d, i) { return "square-" + i}
-            .attr('y',marginSize + yStart)
+            .attr('y', marginSize + yStart)
             .attr('x', function(d, i) { return strokeSize/2 + i * (squareWidth) + marginSize; }) //Extra this.strokeSize + added in order to prevent part of the border from being cut off
             .attr('width', squareWidth)
             .attr('height', squareWidth)
-            .attr('fill', 'white')
+            .attr('fill', function (d, i) {
+                if (!values) {
+                    return 'white'
+                }
+                for (let j = 0; j < Math.min(4, values.length); j++) {
+                    if (values[j] == i) {
+                        console.log(values, colors[j]);
+                        return colors[j];
+                    }
+                }
+                return 'white';
+            })
             .attr('stroke', 'black')
             .attr('stroke-width', strokeSize)
             .attr('rx', curveAmount)
@@ -484,9 +717,10 @@ export class Visualizer {
                 .text(d => d);
     }
   
-    drawCircles(svg, data, circleDiameter, marginSize, strokeSize, seperationSize = 0) {
+    drawCircles(svg, data, circleDiameter, marginSize, strokeSize, seperationSize = 0, values = []) {
         const circleRadius = circleDiameter/2;
-  
+        const colors = this.colors;
+
         svg.selectAll('circle')
             .data(data)
             .enter()
@@ -495,7 +729,19 @@ export class Visualizer {
                 .attr('cy', marginSize + circleRadius)
                 .attr('cx', function(d, i) { return strokeSize/2 + i * (circleDiameter + seperationSize) + marginSize + circleRadius; })
                 .attr('r', circleRadius)
-                .attr('fill', 'white')
+                .attr('fill', function (d, i) {
+                    if (!values) {
+                        return 'white'
+                    }
+                    //console.log("here27", values, i)
+                    for (let j = 0; j < Math.min(4, values.length); j++) {
+                        //console.log("here28", values[j], i, data[i], values[j] != null, "val" in values[j], values[j].val == data[i]);
+                        if (values[j] != null && "val" in values[j] && values[j].val == data[i]) {
+                            return colors[j];
+                        }
+                    }
+                    return 'white';
+                })
                 .attr('stroke', 'black')
                 .attr('stroke-width', strokeSize);
     }
@@ -517,7 +763,7 @@ export class Visualizer {
   
         this.drawSquares(group, arr1, squareWidth, marginSize, strokeSize, 0, 0, ".keys");
         this.writeText(group, arr1, squareWidth, marginSize, strokeSize, 0, 0, ".keyText");
-        this.drawSquares(group, arr2, squareWidth, marginSize, strokeSize, 0, squareWidth, ".values");
+        this.drawSquares(group, arr2, squareWidth, marginSize, strokeSize, 0, squareWidth, ".values"); //-- IDK why this is .values and not just values
         this.writeText(group, arr2, squareWidth, marginSize, strokeSize, 0, squareWidth, ".valueText");
     }
 
