@@ -13,7 +13,14 @@
 
     <!-- Monaco Editor CDN -->
     <script src="https://unpkg.com/monaco-editor@0.49.0/min/vs/loader.js"></script>
-    
+    <style>
+        .my-highlighted-line {
+            background-color: rgba(255, 255, 0, 0.3); /* Yellow with transparency */
+        }
+        .my-line-number-highlight {
+            background-color: rgba(0, 123, 255, 0.1); /* Light blue for line number gutter */
+        }
+    </style>
     <!-- Main script for Monaco initialization and form submission handling -->
     <script>
         // Store the Monaco editor instance globally for access by app.js if needed
@@ -81,6 +88,7 @@ while (neighbor != null) {
 `;
 
             require(['vs/editor/editor.main'], function() {
+                let currentHighlightDecorations = []; 
                 monacoEditorInstance = monaco.editor.create(document.getElementById('monaco-editor-container'), {
                     value: defaultCode,
                     language: 'javascript', // Set default language
@@ -96,7 +104,50 @@ while (neighbor != null) {
                     insertSpaces: true,
                     // You can add more options here to fine-tune the editor
                 });
-                window.highlightLine(5);
+                window.highlightLine = (lineNumber) => {
+                    if (!monacoEditorInstance) {
+                        console.warn('Monaco editor not initialized yet.');
+                        return;
+                    }
+
+                    // Clear previous decorations
+                    currentHighlightDecorations = monacoEditorInstance.deltaDecorations(
+                        currentHighlightDecorations,
+                        []
+                    );
+
+                    // Apply new decoration if a valid line number is provided
+                    if (lineNumber > 0 && lineNumber <= monacoEditorInstance.getModel().getLineCount()) {
+                        currentHighlightDecorations = monacoEditorInstance.deltaDecorations(
+                            [],
+                            [
+                                {
+                                    range: new monaco.Range(lineNumber, 1, lineNumber, monacoEditorInstance.getModel().getLineMaxColumn(lineNumber)),
+                                    options: {
+                                        isWholeLine: true,
+                                        className: 'my-highlighted-line',
+                                        // linesDecorationsClassName: 'my-line-number-highlight' 
+                                    }
+                                }
+                            ]
+                        );
+                        // Optionally scroll to the highlighted line
+                        monacoEditorInstance.revealLineInCenter(lineNumber);
+                    }
+                };
+
+                /**
+                 * Clears all active highlights from the Monaco Editor.
+                 */
+                window.clearHighlights = () => {
+                    if (monacoEditorInstance && currentHighlightDecorations.length > 0) {
+                        currentHighlightDecorations = monacoEditorInstance.deltaDecorations(
+                            currentHighlightDecorations,
+                            []
+                        );
+                    }
+                };
+                window.highlightLine(4);
 
                 // Get the form and the hidden input field
                 const userCodeForm = document.getElementById('user-code-form');
