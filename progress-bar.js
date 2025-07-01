@@ -1,7 +1,7 @@
 import { Visualizer } from "./visualizer.js";
 
 export class ProgressBar {
-    constructor(visualizer, snapshotObject, width = 50, height = 20) {
+    constructor(visualizer, snapshotObject, window, width = 50, height = 20) {
         this.container = d3.select('#slider-container')
             .style('position', 'relative')
             .style('box-sizing', 'border-box')
@@ -14,6 +14,7 @@ export class ProgressBar {
         console.log('blah2', this.selectedSnapshots);
         this.value = 1;
         this.maxValue = snapshotObject.snapshots.length;
+        this.window = window;
 
         this.label = this.container.append('div')
             .style('position', 'absolute')
@@ -156,18 +157,27 @@ export class ProgressBar {
         }
     }
     */
-
+    updateSnapshotDisplay(snapshotIndex) {
+        const currentSnapshot = snapshots[snapshotIndex];
+        if (currentSnapshot && currentSnapshot.line) {
+            this.window.highlightLine(currentSnapshot.line);
+        }
+    }
     visualizeValueChange() {
-        console.log('snapshots3', this.snapshots[this.value - 1]);
+        console.log('snapshots3', this.snapshots[this.value - 1].data);
         console.log('heyo', this.selectedSnapshots, this.value);
         this.visualizer.clear();
         console.log(this.selectedSnapshots, this.value -1);
-        const selectedValueMap = this.getSelectedSnapshot(this.selectedSnapshots[this.value - 1])
-        this.visualizer.visualizeAll(this.snapshots[this.value - 1], selectedValueMap);
+        const selectedValueMap = this.getSelectedSnapshot(this.selectedSnapshots[this.value - 1].data)
+        this.visualizer.visualizeAll(this.snapshots[this.value - 1].data, selectedValueMap);
+        if (this.snapshots[this.value - 1].data && this.snapshots[this.value - 1].line) {
+            this.window.highlightLine(this.snapshots[this.value - 1].line);
+        }
     }
 
     getSelectedSnapshot(selectedSnapshot) {
         let snapshotMap = new Map();
+        console.log("selectedSnapshot", selectedSnapshot)
         selectedSnapshot.forEach((value) => snapshotMap.set(value.name, value.value));
         let valueMap = new Map();
         this.selectedMap.forEach((value, key) => {
@@ -183,8 +193,8 @@ export class ProgressBar {
         return valueMap;
     }
     updateProgressBar(clickedX) {
-        console.log('val2', this.value);
-        console.log(clickedX, 'click');
+        //console.log('val2', this.value);
+        //console.log(clickedX, 'click');
         const newWidth = Math.max(0, Math.min(300, clickedX));
         this.progressBarFill.attr('width', newWidth);
         let oldValue = this.value;
@@ -193,7 +203,7 @@ export class ProgressBar {
         if (oldValue != this.value) {
             this.visualizeValueChange();
         }
-        console.log("currval", this.value)
+        //console.log("currval", this.value)
     }
     iterateProgressBar() {
         console.log('here4')

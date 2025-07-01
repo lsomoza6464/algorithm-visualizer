@@ -58,7 +58,7 @@ function handleFormSubmit(event) {
     //const userCode = userCodeTextarea;
     //console.log('uCode', userCode);
     const userCode = window.getMonacoCode(); 
-    console.log(userCode);
+    console.log("user code:", userCode);
     const selectedMap = getSelectedMap()
     console.log(selectedMap);
     const selectedVariables = getSelectedVariables(selectedMap);
@@ -68,7 +68,7 @@ function handleFormSubmit(event) {
     console.log(snapshotObject);
     const visualizer = new Visualizer(600, 600);
     clearContainers();
-    progressBar = new ProgressBar(visualizer, snapshotObject);
+    progressBar = new ProgressBar(visualizer, snapshotObject, window);
     let leftButton = new DirectionButton('left', progressBar);
     let rightButton = new DirectionButton('right', progressBar);
     progressBar.visualizeValueChange();

@@ -63,7 +63,8 @@ const snapshotCode = `
             }
         }
     }
-    snapshots.push(snapshot);
+    //snapshots.push(snapshot);
+    snapshots.push({ line: LINE_NUMBER_PLACEHOLDER, data: snapshot }); 
     selectedSnapshot = [];
     for (const varIndex in selectedContext) {
         if(typeof selectedContext[varIndex] !== 'undefined'){
@@ -86,7 +87,8 @@ const snapshotCode = `
             }
         }
     }
-    selectedSnapshots.push(selectedSnapshot);
+    //selectedSnapshots.push(selectedSnapshot);
+    selectedSnapshots.push({ line: LINE_NUMBER_PLACEHOLDER, data: selectedSnapshot });
 `;
 
   function improvedTraverseAndInjectSnapshots(node, includedVariables = [], selectedVariables = [], parentNode = null, parentkey = null) {
@@ -100,6 +102,7 @@ const snapshotCode = `
         let selectedSnapshots = [];
         let selectedSnapshot = new Map();
         const selectedContext = ${JSON.stringify(selectedVariables)};
+        let lines = [];
     `;
     console.log('origin', originalVars);
 
@@ -153,8 +156,13 @@ const snapshotCode = `
         currBody = node.body
     }
     for (const line of currBody) {
+        console.log("currLine", line, line.loc.start.line)
         bodyArr.push(line);
-        for (const snapLine of snapshotAst.body) {
+        const currentLineNumber = line.loc ? line.loc.start.line : 'undefined';
+        const snapshotWithLine = snapshotCode.replace(/LINE_NUMBER_PLACEHOLDER/g, currentLineNumber);
+        const snapshotAstWithLine = acorn.parse(snapshotWithLine);
+        
+        for (const snapLine of snapshotAstWithLine.body) {
             bodyArr.push(snapLine);
         }
         const loopTypes = new Set([
@@ -219,6 +227,7 @@ const snapshotCode = `
         }
         ast = newBlock;
     }
+    console.log("body array:", bodyArr);
   }
 
   function traverseLoopsAndInjectSnapshots(node, includedVariables = [], selectedVariables = [], parentNode = null, parentkey = null) {
@@ -248,7 +257,11 @@ const snapshotCode = `
     //}
     for (const line of statements) {
         bodyArr.push(line);
-        for (const snapLine of snapshotAst.body) {
+        const currentLineNumber = line.loc ? line.loc.start.line : 'undefined';
+        const snapshotWithLine = snapshotCode.replace(/LINE_NUMBER_PLACEHOLDER/g, currentLineNumber);
+        const snapshotAstWithLine = acorn.parse(snapshotWithLine);
+        
+        for (const snapLine of snapshotAstWithLine.body) {
             bodyArr.push(snapLine);
         }
         const loopTypes = new Set([
@@ -267,101 +280,6 @@ const snapshotCode = `
    node.body.body = bodyArr;
   }
 
-  /*function traverseAndInjectSnapshots(node, parentNode = null, parentKey = null) {
-    const snapshotCode = `
-        //__PAUSE__//
-        
-        // Capture snapshots of relevant variables
-        let snapshot = {};
-        for (const varName in this) {
-          if (this.hasOwnProperty(varName)) {
-            snapshot[varName] = { 
-              type: typeof this[varName],
-              value: structuredClone(this[varName])
-            };
-          }
-        }
-        snapshots.push(snapshot);
-      `;
-
-    // Identify points where you want to inject the snapshot code
-    if (node.type === 'ExpressionStatement' || 
-        node.type === 'VariableDeclaration') {
-
-        // Parse the snapshotCode into an AST
-        const snapshotAst = acorn.parse(snapshotCode);
-        console.log('snapshot', snapshotAst);
-
-        // If the current node is a BlockStatement, append the snapshot code to its body
-        if (node.type === 'BlockStatement') {
-            console.log('here');
-            for (const line of snapshotAst.body) {
-                node.body.push(line);
-            }
-        } else {
-            // Otherwise, create a new BlockStatement to wrap the current node and the snapshot code
-            let bodyArr = [];
-            for (const line of snapshotAst.body) {
-                bodyArr.push(line);
-            }
-            const newBlock = {
-                type: 'BlockStatement',
-                body: [node, ...snapshotAst.body]
-            };
-
-            if (parentNode && parentKey) {
-                if (Array.isArray(parentNode[parentKey])) {
-                    // If the child is in an array, find its index and replace it
-                    const index = parentNode[parentKey].indexOf(node);
-                    if (index !== -1) {
-                        parentNode[parentKey][index] = newBlock;
-                    }
-                } else {
-                    // If the child is a direct property, replace it directly
-                    parentNode[parentKey] = newBlock;
-                }
-            } else {
-                // If there's no parent (root node), replace the entire AST
-                ast = newBlock; 
-            }
-        }
-    }*
-  
-    // Recursively traverse child nodes
-    for (const key in node) {
-      if (node.hasOwnProperty(key)) {
-        const child = node[key];
-        if (typeof child === 'object' && child !== null) {
-          if (Array.isArray(child)) {
-            child.forEach(childNode => traverseAndInjectSnapshots(childNode, node, key));   
-          } else {
-            traverseAndInjectSnapshots(child, node, key);
-          }
-        }
-      }
-    }
-  }*/
-
-/*function executeCodeWithPauses(instrumentedCode) {
-    const context = { 
-      // ... your sandbox context
-    };
-  
-    return new Promise(async (resolve) => {
-      const codeChunks = instrumentedCode.split('//__PAUSE__//\n'); // Split based on your custom delimiter
-  
-      for (const chunk of codeChunks) {
-        eval(chunk); // Execute the current chunk in the context
-        await new Promise(resolve => setTimeout(resolve, 0)); 
-      }
-  
-      resolve();
-    });
-  }*/
-
-
-
-
 let variableStates = [];
 const snapShot = new Map();
 
@@ -376,7 +294,11 @@ worker.onmessage = function(event) {
 
 export function parseCode(userCode, includedVariables = [], selectedVariables = []) {
     const parser = acorn.Parser;
-    ast = parser.parse(userCode, { sourceType: 'module' });
+    ast = parser.parse(userCode, { 
+        sourceType: 'module', 
+        locations: true
+    });
+    console.log('ast', ast);
     improvedTraverseAndInjectSnapshots(ast, includedVariables, selectedVariables);
     const instrumentedCode = generate(ast);
     console.log('new code', instrumentedCode);
