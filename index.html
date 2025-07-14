@@ -10,6 +10,61 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/esprima@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-interpreter@3"></script>
+    <!-- Include Axios from CDN -->
+<!--<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    async function fetchTopDiscussions(titleSlug, limit = 5) {
+        const query = `
+  query getQuestionSolutions($titleSlug: String!) {
+    question(titleSlug: $titleSlug) {
+      solution {
+        id
+        canSeeDiscuss
+        discussUrl
+      }
+    }
+    questionSolutions(titleSlug: $titleSlug) {
+      solutions {
+        id
+        runtime
+        memory
+        votes
+        solution
+        url
+        language
+        author {
+          username
+        }
+      }
+    }
+  }
+`;
+
+const variables = { titleSlug: 'two-sum' };
+
+try {
+  const response = await axios.post('http://localhost:4000/leetcode', {
+    query,
+    variables
+  });
+
+  const sols = response.data.data.questionSolutions.solutions;
+  sols.sort((a,b) => b.votes - a.votes); // top-voted first
+  sols.slice(0, 3).forEach(s => {
+    console.log(`${s.language} by ${s.author.username}: ${s.votes} votes`);
+    console.log(`Runtime: ${s.runtime}, Memory: ${s.memory}`);
+    console.log('Code snippet:\n', s.solution.slice(0, 200), '...\n');
+  });
+} catch (err) {
+  console.error('Error fetching solutions:', err.response?.data || err.message);
+}
+    }
+    
+    fetchTopDiscussions("two-sum", 3);
+    </script>
+-->
+
 
     <!-- Monaco Editor CDN -->
     <script src="https://unpkg.com/monaco-editor@0.49.0/min/vs/loader.js"></script>
