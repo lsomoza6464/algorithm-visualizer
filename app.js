@@ -17,16 +17,18 @@ me = arr[2];
 me = arr[0][0][0];//arr[0] = me + arr[1] + 2 + 4;
 arr[0] = me;
 me = arr[1];
-for (let i = 0; i < 4; i++) {
-    arr.push(i);
-}
 `;
 */
 let progressBar = null;
-const userCodeform = document.getElementById('user-code-form');
-userCodeform.addEventListener('submit', handleFormSubmit);
-//const sliderForm = document.getElementById('slider-form');
-//sliderForm.addEventListener('submit', handleSliderDirection);
+
+// Wait for DOM to be ready before accessing elements
+document.addEventListener('DOMContentLoaded', () => {
+    const userCodeform = document.getElementById('user-code-form');
+    if (userCodeform) {
+        userCodeform.addEventListener('submit', handleFormSubmit);
+    }
+});
+// generateLeetCodeProblemsList(); // Remove - Node.js only
 
 //const snapshots = parseCode(userCode);
 //console.log(snapshots);
@@ -133,87 +135,3 @@ export function handleLeftClicked() {
 export function handleRightClicked() {
     progressBar.iterateProgressBar();
 }
-
-const userArr = [1, 2, 3, 10, 20, 30 , 40, 50, 60, 100, 10, 1, 1, 1,1,1,11,1,1,1,1,11,1,1];
-const myArr = [40, 20 , 10000];
-const mySet = new Set([1, 2, 3, 5, 6]);
-/*const myLinkedList = {
-    val:1,
-    next:{
-        val:2, 
-        next:{
-            value:3,
-            next:{
-                val:4
-            }
-        }
-    }
-}*/
-const myLinkedList = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4))));
-console.log("myLinkedList", myLinkedList);
-let hashmap = {
-    "key":"value",
-    1:10,
-    23:4
-}
-const tree = new TreeNode("A", new TreeNode("B", new TreeNode("D"), new TreeNode("T")), new TreeNode("F", new TreeNode("G"), new TreeNode("H"), new TreeNode("I"), new TreeNode("J"), new TreeNode("K", new TreeNode("R"), new TreeNode("Q", new TreeNode("W")))));
-/*const graph = {
-    val: "A",
-    neighbors: [
-        {
-            val: "B",
-            neighbors: [
-                {
-                    val:"D",
-                    neighbors: [
-                        {val:"G"}
-                    ]
-                }
-            ]
-        },
-        {
-            val: "C",
-            neighbors: [
-                {val: "E"},
-                {val: "F"},
-                {val: "A"}
-            ]
-        },
-        {val:"G"},
-        {val:"H"},
-        {val:"I"},
-        {val:"J"},
-        {val:"K"},
-        {val:"L"}]
-}*/
-const graph = new GraphNode("A", [
-    new GraphNode("B", [new GraphNode("D", [new GraphNode("G")])]),
-    new GraphNode("C", [new GraphNode("E"), new GraphNode("F"), new GraphNode("A")]),
-    new GraphNode("G"),
-    new GraphNode("H"),
-    new GraphNode("I"),
-    new GraphNode("J"),
-    new GraphNode("K"),
-    new GraphNode("L")
-]);
-const graph2 = new GraphNode("A", [new GraphNode("B")]);
-const matrix = [[0, 1, 2, 3], [4, 4, 4, 4], [5, 4, 3, 2]];
-//visualizer.visualize('userArr', userArr);
-//progressBar.visualizeBar(snapshots.length);
-const visualizer = new Visualizer(600, 600);
-visualizer.visualize('ha', 'here');
-visualizer.visualizeArr('userArr', userArr);
-visualizer.visualizeSet('mySet', mySet);
-visualizer.visualizeLinkedList('myLinkedList', myLinkedList);
-visualizer.visualizeLinkedList('myLinkedList', myLinkedList, true);
-visualizer.visualizeHashmap('hashmap', hashmap);
-visualizer.visualizeMatrix('matrix', matrix);
-visualizer.visualizeTree('tree', tree);
-visualizer.visualizeGraph('graph', graph);
-visualizer.visualizeGraph('graph2', graph2, false);
-
-document.getElementById("user-code-form").addEventListener('submit', async(event) => {
-    event.preventDefault();
-    //const userCode = document.getElementById("user-code");
-    //visualizer.visualize();
-});

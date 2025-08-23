@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "acorn": "^8.12.1",
+    "acorn": "^8.15.0",
     "acorn-es6": "^0.0.3",
     "acorn-es7-plugin": "^1.1.7",
     "astring": "^1.8.6",
@@ -48,7 +48,9 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
-    "serve": "webpack serve"
+    "serve": "webpack serve",
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "keywords": [],
   "author": "",

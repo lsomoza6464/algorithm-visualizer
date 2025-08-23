@@ -24,6 +24,4 @@ export class DirectionButton {
                 .on('click', () => progressBar.iterateProgressBar());
         }
     }
-
-
 }

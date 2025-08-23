@@ -1,0 +1,50 @@
+<!-- leetcode.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LeetCode Autoload</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="leetcode-loader.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
+  <div class="bg-white p-10 rounded-lg shadow-md text-center w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">Enter a LeetCode Problem Number</h1>
+
+    <form id="problem-form" class="space-y-4">
+      <input
+        type="text"
+        id="problem-number"
+        placeholder="e.g., 1 for Two Sum"
+        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        required
+      />
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+        Load Problem
+      </button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('problem-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const number = document.getElementById('problem-number').value.trim();
+      if (!number) return;
+
+      // Redirect to manual.html with query params or use your existing JS logic to generate parameters
+      // Example: window.location.href = `manual.html?problem=two-sum`;
+
+      // Assuming you already have a JS function that maps number to slug and generates default code/settings:
+      const params = await getLeetCodeDefaults(number); // You said this is done
+
+      const url = new URL('manual.html', window.location.origin);
+      Object.entries(params).forEach(([key, val]) => {
+        url.searchParams.set(key, val);
+      });
+
+      window.location.href = url.toString();
+    });
+  </script>
+</body>
+</html>
