@@ -488,58 +488,65 @@ while (neighbor != null) {
             <div id="leetcode-problem-info" class="mt-3"></div>
         </div>
         -->
-        <div id="user-code" class="mb-8">
-            <form id="user-code-form">
-                <label for="monaco-editor-container" class="block text-gray-700 text-lg font-semibold mb-2">Enter your code here</label>
-                <!-- Monaco Editor container - Increased height and explicit style for debugging -->
-                <div id="monaco-editor-container" class="w-full border border-gray-300 rounded-md overflow-hidden shadow-sm" style="height: 700px;"></div>
-                <!-- Hidden input to store Monaco Editor's value on form submission -->
-                <input type="hidden" id="user-code-hidden-input" name="user-code">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <div id="user-code" class="flex-1">
+                <form id="user-code-form">
+                    <label for="monaco-editor-container" class="block text-gray-700 text-lg font-semibold mb-2">Enter your code here</label>
+                    <!-- Monaco Editor container - Increased height and explicit style for debugging -->
+                    <div id="monaco-editor-container" class="w-full border border-gray-300 rounded-md overflow-hidden shadow-sm" style="height: 700px;"></div>
+                    <!-- Hidden input to store Monaco Editor's value on form submission -->
+                    <input type="hidden" id="user-code-hidden-input" name="user-code">
+                    
+                    <br>
+                    <label for="included-variables" class="block text-gray-700 text-lg font-semibold mb-2">Enter the variables that you want to visualize here:</label>
+                    <input id="included-variables" name="included-variables" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="arr, target, start, end, middle, myLinkedList, curr, tree, left, graph, neighbor">
+                    <br><br>
+                    
+                    <label for="selected-variables" class="block text-gray-700 text-lg font-semibold mb-2">Enter the target variables and their data structures that you want to visualize here:</label>
+                    <input id="selected-variables" name="selected-variables" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="arr:start, end, middle; myLinkedList:curr; tree:left; graph:neighbor">
+                    <br><br>
+
+                    <label for="leetcode-problem" class="block text-gray-700 text-lg font-semibold mb-2">Enter a leetcode problem that you want to visualize here:</label>
+                    <div class="flex space-x-2">
+                        <input id="leetcode-problem" name="leetcode-problem" class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="two-sum" list="leetcode-problems-list" placeholder="Start typing to see available problems...">
+                        <button type="button" id="load-problem-btn" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300">Load Problem</button>
+                    </div>
+                    <datalist id="leetcode-problems-list">
+                        <!-- LeetCode problem suggestions will be loaded here -->
+                    </datalist>
+                    <br><br>
+                    
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-md text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">Submit your code</button>
+                </form>
                 
                 <br>
-                <label for="included-variables" class="block text-gray-700 text-lg font-semibold mb-2">Enter the variables that you want to visualize here:</label>
-                <input id="included-variables" name="included-variables" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="arr, target, start, end, middle, myLinkedList, curr, tree, left, graph, neighbor">
-                <br><br>
-                
-                <label for="selected-variables" class="block text-gray-700 text-lg font-semibold mb-2">Enter the target variables and their data structures that you want to visualize here:</label>
-                <input id="selected-variables" name="selected-variables" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="arr:start, end, middle; myLinkedList:curr; tree:left; graph:neighbor">
-                <br><br>
-
-                <label for="leetcode-problem" class="block text-gray-700 text-lg font-semibold mb-2">Enter a leetcode problem that you want to visualize here:</label>
-                <div class="flex space-x-2">
-                    <input id="leetcode-problem" name="leetcode-problem" class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="two-sum" list="leetcode-problems-list" placeholder="Start typing to see available problems...">
-                    <button type="button" id="load-problem-btn" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300">Load Problem</button>
+                <div class="flex justify-center items-center space-x-4 mt-6">
+                    <div class="left-container" id="left-container"></div>
+                    <div class="slider-container" id="slider-container"></div>
+                    <div class="right-container" id="right-container"></div>
+                    <!--<button id="leftButton" class="bg-gray-300 text-gray-800 p-2 rounded-full shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <p class="text-xl font-medium text-gray-700">1</p>
+                    <button id="rightButton" class="bg-gray-300 text-gray-800 p-2 rounded-full shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>-->
                 </div>
-                <datalist id="leetcode-problems-list">
-                    <!-- LeetCode problem suggestions will be loaded here -->
-                </datalist>
-                <br><br>
-                
-                <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-md text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">Submit your code</button>
-            </form>
-            
-            <br>
-            <div class="flex justify-center items-center space-x-4 mt-6">
-                <div class="left-container" id="left-container"></div>
-                <div class="slider-container" id="slider-container"></div>
-                <div class="right-container" id="right-container"></div>
-                <!--<button id="leftButton" class="bg-gray-300 text-gray-800 p-2 rounded-full shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-                <p class="text-xl font-medium text-gray-700">1</p>
-                <button id="rightButton" class="bg-gray-300 text-gray-800 p-2 rounded-full shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>-->
+            </div>
+            <div id="right-container" class="flex-1">
+                <label for="visualization-container" class="block text-gray-700 text-lg font-semibold mb-2">Your Visualization</label>
+                <div id="visualization-container" class="bg-gray-50 border border-gray-300 rounded-md p-4 shadow-sm">
+                    <!-- Visualization content will be rendered here by D3/JS -->
+                </div>
             </div>
         </div>
         <br>
-        <div id="visualization-container" class="mt-8">
-            <!-- Visualization content will be rendered here by D3/JS -->
-        </div>
+        <!--<div id="visualization-container" class="mt-8">
+        </div>-->
     </div>
     
     <!-- Scripts -->
