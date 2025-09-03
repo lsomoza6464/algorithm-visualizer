@@ -521,9 +521,10 @@ while (neighbor != null) {
                 
                 <br>
                 <div class="flex justify-center items-center space-x-4 mt-6">
-                    <div class="left-container" id="left-container"></div>
+                    <!--<div class="left-container" id="left-container"></div>
                     <div class="slider-container" id="slider-container"></div>
                     <div class="right-container" id="right-container"></div>
+                -->
                     <!--<button id="leftButton" class="bg-gray-300 text-gray-800 p-2 rounded-full shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300">
                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -537,8 +538,18 @@ while (neighbor != null) {
                     </button>-->
                 </div>
             </div>
-            <div id="right-container" class="flex-1">
+            <div id="right-tab-container" class="flex-1">
                 <label for="visualization-container" class="block text-gray-700 text-lg font-semibold mb-2">Your Visualization</label>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="left-container" id="left-container"></div>
+                    <div class="slider-container" id="slider-container"></div>
+                    <div class="right-container" id="right-container"></div>
+                </div>
+                <!--
+                <div class="left-container" id="left-container"></div>
+                <div class="slider-container" id="slider-container"></div>
+                <div class="right-container" id="right-container"></div>
+                -->
                 <div id="visualization-container" class="bg-gray-50 border border-gray-300 rounded-md p-4 shadow-sm">
                     <!-- Visualization content will be rendered here by D3/JS -->
                 </div>
