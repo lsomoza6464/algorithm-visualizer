@@ -1,0 +1,33 @@
+# Build directory
+build/
+cmake-build-*/
+
+# Database files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Configuration files with secrets
+config.json
+
+# Compiled binaries
+backend_server
+*.exe
+*.out
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store

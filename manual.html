@@ -472,6 +472,25 @@ while (neighbor != null) {
 </head>
 <body class="h-full bg-gray-100 p-8 font-inter overflow-auto">
     <div class="mx-auto bg-white p-6 rounded-lg shadow-md w-full md:w-4xl">
+        <div class="flex justify-between items-center mb-4">
+            <a href="/" class="text-blue-600 hover:text-blue-700 text-sm font-semibold flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Home
+            </a>
+            <div class="flex gap-3 items-center">
+                <button id="save-visualization-btn" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition text-sm flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    Save
+                </button>
+                <a href="auth.html" class="text-blue-600 hover:text-blue-700 text-sm font-semibold">Login</a>
+                <span class="text-gray-400">|</span>
+                <a href="history.html" class="text-blue-600 hover:text-blue-700 text-sm font-semibold">History</a>
+            </div>
+        </div>
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Javascript Algorithm Visualizer</h1>
         <!--
         <div class="mb-6 bg-gray-50 p-4 rounded-lg">
@@ -561,6 +580,69 @@ while (neighbor != null) {
     </div>
     
     <!-- Scripts -->
+    <!-- Save visualization functionality -->
+    <script>
+        const API_BASE = 'http://localhost:3001';
+
+        document.getElementById('save-visualization-btn').addEventListener('click', async () => {
+            try {
+                // Check if user is logged in
+                const authResponse = await fetch(`${API_BASE}/api/auth/me`, {
+                    credentials: 'include'
+                });
+
+                if (!authResponse.ok) {
+                    alert('Please log in to save visualizations');
+                    window.location.href = 'auth.html';
+                    return;
+                }
+
+                // Get title and description from user
+                const title = prompt('Enter a title for this visualization:');
+                if (!title) return; // User cancelled
+
+                const description = prompt('Enter a description (optional):') || '';
+
+                // Get current code from Monaco editor
+                const code = monacoEditorInstance ? monacoEditorInstance.getValue() : '';
+
+                // Get variables from form
+                const includedVars = document.getElementById('included-variables').value || '';
+                const selectedVars = document.getElementById('selected-variables').value || '';
+
+                // Save to backend
+                const saveResponse = await fetch(`${API_BASE}/api/visualizations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        code,
+                        included_variables: includedVars,
+                        selected_variables: selectedVars,
+                        visualization_config: '{}'
+                    })
+                });
+
+                if (saveResponse.ok) {
+                    const result = await saveResponse.json();
+                    alert('Visualization saved successfully!');
+                    console.log('Saved visualization:', result);
+                } else {
+                    const error = await saveResponse.json();
+                    alert('Error saving visualization: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error saving visualization:', error);
+                console.error('Error details:', error.message, error.stack);
+                alert('Error: ' + error.message + '\n\nCheck browser console for details.');
+            }
+        });
+    </script>
+
     <!-- Only the main app.js needs type="module" - it imports all other modules -->
     <script src="app.js" type="module"></script>
 </body>

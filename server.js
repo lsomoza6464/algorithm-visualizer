@@ -2,12 +2,53 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Proxy authentication and backend requests to C++ backend server
+// With graceful error handling if backend is not running
+const backendProxy = createProxyMiddleware({
+    target: 'http://localhost:3001',
+    changeOrigin: true,
+    ws: true,
+    logLevel: 'debug',
+    onProxyReq: (proxyReq, req) => {
+        // Forward cookies to backend
+        if (req.headers.cookie) {
+            proxyReq.setHeader('Cookie', req.headers.cookie);
+        }
+    },
+    onProxyRes: (proxyRes, req, res) => {
+        // Forward cookies from backend
+        if (proxyRes.headers['set-cookie']) {
+            res.setHeader('set-cookie', proxyRes.headers['set-cookie']);
+        }
+    },
+    onError: (err, req, res) => {
+        console.error(`Proxy error: ${err.message}`);
+        if (!res.headersSent) {
+            res.status(503).json({
+                error: 'Backend service not available',
+                message: err.message
+            });
+        }
+    }
+});
+
+// Proxy all /api/* endpoints to C++ backend (except leetcode-problems which is handled locally)
+app.use('/api/auth', backendProxy);
+app.use('/api/visualizations', backendProxy);
+app.use('/api/leetcode', backendProxy);
+app.use('/api/health', backendProxy);
 
 // Serve static files
 app.use(express.static('.'));
