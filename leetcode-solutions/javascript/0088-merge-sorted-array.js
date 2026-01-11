@@ -1,3 +1,8 @@
+let nums1 = [1, 2, 3, 0, 0, 0];
+let nums2 = [2, 5, 6];
+let m = 3;
+let n = 3;
+
 /**
  * Linear 
  * Time O(N) | Space O(1)
@@ -8,27 +13,25 @@
  * @param {number} n
  * @return {void} Do not return anything, modify nums1 in-place instead.
  */
-var merge = function(nums1, m, nums2, n) {
 
-    let k = m + n - 1;
-    m = m - 1;
-    n = n - 1;
-    while (m >= 0 && n >= 0) {
-        if (nums1[m] > nums2[n]) {
-            nums1[k] = nums1[m];
-            m--;
-        } else {
-            nums1[k] = nums2[n];
-            n--;
-        }
+let k = m + n - 1;
+m = m - 1;
+n = n - 1;
+while (m >= 0 && n >= 0) {
+    if (nums1[m] > nums2[n]) {
+        nums1[k] = nums1[m];
+        m--;
+    } else {
+        nums1[k] = nums2[n];
+        n--;
+    }
+    k--;
+}
+
+if (n >= 0) {
+    while (n >= 0) {
+        nums1[k] = nums2[n];
+        n--;
         k--;
     }
-
-    if (n >= 0) {
-        while (n >= 0) {
-            nums1[k] = nums2[n];
-            n--;
-            k--;
-        }
-    }
-};
+}
