@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
     nlohmann-json3-dev \
+    libboost-date-time-dev \
     git \
     && rm -rf /var/lib/apt/lists/*
 

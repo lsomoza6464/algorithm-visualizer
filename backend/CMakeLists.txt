@@ -4,9 +4,11 @@ project(DebugVisualizerBackend)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Set Boost hints for macOS Homebrew
-set(BOOST_ROOT "/opt/homebrew")
-set(Boost_INCLUDE_DIR "/opt/homebrew/include")
+# Set Boost hints for macOS Homebrew (only on macOS)
+if(APPLE)
+    set(BOOST_ROOT "/opt/homebrew")
+    set(Boost_INCLUDE_DIR "/opt/homebrew/include")
+endif()
 
 # Find required packages
 find_package(Threads REQUIRED)
