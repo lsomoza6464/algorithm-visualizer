@@ -9,7 +9,7 @@ const isLocalhost = window.location.hostname === 'localhost' || window.location.
 
 // Backend URLs
 const BACKEND_URL = isGitHubPages
-    ? 'https://leetcode-visualizer-backend.onrender.com'  // Will update after Render deployment
+    ? 'https://algorithm-visualizer-e83c.onrender.com'  // Will update after Render deployment
     : 'http://localhost:3001';
 
 // API Base for fetch requests
