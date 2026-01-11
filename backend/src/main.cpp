@@ -53,9 +53,10 @@ int main() {
     // Initialize auth handler
     auto auth_handler = std::make_shared<auth::AuthHandler>(database);
 
-    // Load OAuth configuration from config file
+    // Load OAuth configuration from config file or environment variables
     std::ifstream config_file("config.json");
     if (config_file.is_open()) {
+        // Use config.json for local development
         json config;
         config_file >> config;
 
@@ -78,8 +79,48 @@ int main() {
                 );
             }
         }
+        std::cout << "OAuth configured from config.json" << std::endl;
     } else {
-        std::cout << "Warning: config.json not found. OAuth will not be configured." << std::endl;
+        // Fall back to environment variables for production (Render, etc.)
+        std::cout << "config.json not found. Using environment variables..." << std::endl;
+
+        const char* google_client_id = std::getenv("GOOGLE_CLIENT_ID");
+        const char* google_client_secret = std::getenv("GOOGLE_CLIENT_SECRET");
+
+        if (google_client_id && google_client_secret) {
+            // Get backend URL for redirect URI
+            const char* backend_url = std::getenv("RENDER_EXTERNAL_URL");
+            std::string redirect_uri = backend_url
+                ? std::string(backend_url) + "/api/auth/callback/google"
+                : "http://localhost:3001/api/auth/callback/google";
+
+            auth_handler->configureGoogleOAuth(
+                google_client_id,
+                google_client_secret,
+                redirect_uri
+            );
+            std::cout << "Google OAuth configured from environment variables" << std::endl;
+        } else {
+            std::cout << "Warning: Google OAuth credentials not found in environment" << std::endl;
+        }
+
+        // GitHub OAuth from env vars (optional)
+        const char* github_client_id = std::getenv("GITHUB_CLIENT_ID");
+        const char* github_client_secret = std::getenv("GITHUB_CLIENT_SECRET");
+
+        if (github_client_id && github_client_secret) {
+            const char* backend_url = std::getenv("RENDER_EXTERNAL_URL");
+            std::string redirect_uri = backend_url
+                ? std::string(backend_url) + "/api/auth/callback/github"
+                : "http://localhost:3001/api/auth/callback/github";
+
+            auth_handler->configureGitHubOAuth(
+                github_client_id,
+                github_client_secret,
+                redirect_uri
+            );
+            std::cout << "GitHub OAuth configured from environment variables" << std::endl;
+        }
     }
 
     crow::SimpleApp app;
