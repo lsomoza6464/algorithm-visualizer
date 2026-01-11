@@ -64,10 +64,21 @@ std::string urlDecode(const std::string& str) {
     return decoded;
 }
 
+// Helper function to get allowed origin based on environment
+std::string getAllowedOrigin() {
+    // Check if FRONTEND_URL environment variable is set (for production)
+    const char* frontend_url = std::getenv("FRONTEND_URL");
+    if (frontend_url) {
+        return std::string(frontend_url);
+    }
+    // Default to localhost for development
+    return "http://localhost:3000";
+}
+
 crow::response jsonResponse(const nlohmann::json& data, int status) {
     crow::response res(status);
     res.set_header("Content-Type", "application/json");
-    res.set_header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.set_header("Access-Control-Allow-Origin", getAllowedOrigin());
     res.set_header("Access-Control-Allow-Credentials", "true");
     res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
@@ -91,7 +102,7 @@ crow::response successResponse(const std::string& message) {
 
 crow::response corsOptionsResponse() {
     crow::response res(204);
-    res.set_header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.set_header("Access-Control-Allow-Origin", getAllowedOrigin());
     res.set_header("Access-Control-Allow-Credentials", "true");
     res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");

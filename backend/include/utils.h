@@ -18,6 +18,9 @@ std::string generateRandomToken(size_t length = 32);
 std::string urlEncode(const std::string& str);
 std::string urlDecode(const std::string& str);
 
+// Environment helpers
+std::string getAllowedOrigin();
+
 // JSON helpers
 crow::response jsonResponse(const nlohmann::json& data, int status = 200);
 crow::response errorResponse(const std::string& message, int status = 400);

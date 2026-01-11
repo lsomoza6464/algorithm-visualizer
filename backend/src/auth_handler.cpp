@@ -55,7 +55,7 @@ crow::response AuthHandler::handleOAuthLogin(const std::string& provider) {
     // Redirect to OAuth provider
     crow::response res(302);
     res.set_header("Location", auth_url);
-    res.set_header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.set_header("Access-Control-Allow-Origin", utils::getAllowedOrigin());
     res.set_header("Access-Control-Allow-Credentials", "true");
     return res;
 }
@@ -124,10 +124,16 @@ crow::response AuthHandler::handleOAuthCallback(const std::string& provider, con
         }
 
         // Redirect back to frontend with session cookie
+        std::string frontend_url = utils::getAllowedOrigin();
         crow::response res(302);
-        res.set_header("Location", "http://localhost:3000/auth.html");
-        res.set_header("Set-Cookie", "session_token=" + session_token + "; Path=/; Domain=localhost; SameSite=Lax; Max-Age=" + std::to_string(7 * 24 * 60 * 60));
-        res.set_header("Access-Control-Allow-Origin", "http://localhost:3000");
+        res.set_header("Location", frontend_url + "/auth.html");
+
+        // Set cookie - SameSite=None for cross-origin, Secure for HTTPS
+        std::string cookie_value = "session_token=" + session_token +
+            "; Path=/; SameSite=None; Secure; Max-Age=" + std::to_string(7 * 24 * 60 * 60);
+        res.set_header("Set-Cookie", cookie_value);
+
+        res.set_header("Access-Control-Allow-Origin", frontend_url);
         res.set_header("Access-Control-Allow-Credentials", "true");
         return res;
 
