@@ -123,15 +123,10 @@ crow::response AuthHandler::handleOAuthCallback(const std::string& provider, con
             return utils::errorResponse("Failed to create session", 500);
         }
 
-        // Redirect back to frontend with session cookie
+        // Redirect back to frontend with token in URL (for cross-domain compatibility)
         std::string frontend_url = utils::getAllowedOrigin();
         crow::response res(302);
-        res.set_header("Location", frontend_url + "/auth.html");
-
-        // Set cookie - SameSite=None for cross-origin, Secure for HTTPS
-        std::string cookie_value = "session_token=" + session_token +
-            "; Path=/; SameSite=None; Secure; Max-Age=" + std::to_string(7 * 24 * 60 * 60);
-        res.set_header("Set-Cookie", cookie_value);
+        res.set_header("Location", frontend_url + "/auth.html?token=" + session_token);
 
         res.set_header("Access-Control-Allow-Origin", frontend_url);
         res.set_header("Access-Control-Allow-Credentials", "true");

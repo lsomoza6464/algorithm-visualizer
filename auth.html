@@ -69,21 +69,41 @@
   <script src="config.js"></script>
 
   <script>
+    // Extract token from URL if present
+    function extractTokenFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      if (token) {
+        localStorage.setItem('session_token', token);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
 
     async function checkAuth() {
       try {
+        const token = localStorage.getItem('session_token');
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`${API_BASE}/api/auth/me`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: headers
         });
 
         if (response.ok) {
           const user = await response.json();
           showLoggedIn(user);
         } else {
+          // If auth fails, clear the token
+          localStorage.removeItem('session_token');
           showLoggedOut();
         }
       } catch (error) {
         console.error('Error checking auth:', error);
+        localStorage.removeItem('session_token');
         showLoggedOut();
       }
     }
@@ -119,17 +139,26 @@
 
     document.getElementById('logout-btn').addEventListener('click', async () => {
       try {
+        const token = localStorage.getItem('session_token');
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         await fetch(`${API_BASE}/api/auth/logout`, {
           method: 'POST',
-          credentials: 'include'
+          credentials: 'include',
+          headers: headers
         });
+        localStorage.removeItem('session_token');
         window.location.reload();
       } catch (error) {
         console.error('Error logging out:', error);
       }
     });
 
-    // Check authentication status on page load
+    // Extract token from URL and check authentication status on page load
+    extractTokenFromURL();
     checkAuth();
   </script>
 </body>

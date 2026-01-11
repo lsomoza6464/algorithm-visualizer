@@ -69,10 +69,21 @@
   <script>
     let currentUser = null;
 
+    // Helper function to get auth headers
+    function getAuthHeaders(additionalHeaders = {}) {
+      const headers = { ...additionalHeaders };
+      const token = localStorage.getItem('session_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      return headers;
+    }
+
     async function checkAuth() {
       try {
         const response = await fetch(`${API_BASE}/api/auth/me`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: getAuthHeaders()
         });
 
         if (response.ok) {
@@ -95,7 +106,8 @@
     async function loadVisualizations() {
       try {
         const response = await fetch(`${API_BASE}/api/visualizations?limit=50`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: getAuthHeaders()
         });
 
         if (response.ok) {
@@ -150,7 +162,8 @@
     async function loadLeetCodeHistory() {
       try {
         const response = await fetch(`${API_BASE}/api/leetcode/history?limit=50`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: getAuthHeaders()
         });
 
         if (response.ok) {
@@ -201,7 +214,8 @@
     async function loadVisualization(vizId) {
       try {
         const response = await fetch(`${API_BASE}/api/visualizations/${vizId}`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: getAuthHeaders()
         });
 
         if (response.ok) {
@@ -228,7 +242,8 @@
       try {
         const response = await fetch(`${API_BASE}/api/visualizations/${vizId}`, {
           method: 'DELETE',
-          credentials: 'include'
+          credentials: 'include',
+          headers: getAuthHeaders()
         });
 
         if (response.ok) {
@@ -246,7 +261,8 @@
       try {
         const response = await fetch(`${API_BASE}/api/visualizations/${vizId}/favorite`, {
           method: 'POST',
-          credentials: 'include'
+          credentials: 'include',
+          headers: getAuthHeaders()
         });
 
         if (response.ok) {
@@ -269,9 +285,9 @@
 
       fetch(`${API_BASE}/api/leetcode/${problemId}/notes`, {
         method: 'PUT',
-        headers: {
+        headers: getAuthHeaders({
           'Content-Type': 'application/json'
-        },
+        }),
         credentials: 'include',
         body: JSON.stringify({ notes })
       }).then(response => {
@@ -331,9 +347,9 @@
 
       fetch(`${API_BASE}/api/visualizations`, {
         method: 'POST',
-        headers: {
+        headers: getAuthHeaders({
           'Content-Type': 'application/json'
-        },
+        }),
         credentials: 'include',
         body: JSON.stringify({
           title,

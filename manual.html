@@ -67,14 +67,24 @@
             return userCode;
         }
 
+        // Helper function to get auth headers
+        function getAuthHeaders(additionalHeaders = {}) {
+            const headers = { ...additionalHeaders };
+            const token = localStorage.getItem('session_token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
         // Function to record LeetCode problem view
         async function recordLeetCodeView(problemId, problemSlug, problemTitle) {
             try {
                 const response = await fetch('/api/leetcode/view', {
                     method: 'POST',
-                    headers: {
+                    headers: getAuthHeaders({
                         'Content-Type': 'application/json'
-                    },
+                    }),
                     credentials: 'include',
                     body: JSON.stringify({
                         problem_id: problemId,
@@ -627,12 +637,12 @@ while (neighbor != null) {
 
     <!-- Save visualization functionality -->
     <script>
-
         document.getElementById('save-visualization-btn').addEventListener('click', async () => {
             try {
                 // Check if user is logged in
                 const authResponse = await fetch(`${API_BASE}/api/auth/me`, {
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: getAuthHeaders()
                 });
 
                 if (!authResponse.ok) {
@@ -660,9 +670,9 @@ while (neighbor != null) {
                 // Save to backend
                 const saveResponse = await fetch(`${API_BASE}/api/visualizations`, {
                     method: 'POST',
-                    headers: {
+                    headers: getAuthHeaders({
                         'Content-Type': 'application/json'
-                    },
+                    }),
                     credentials: 'include',
                     body: JSON.stringify({
                         title,
