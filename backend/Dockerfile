@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     nlohmann-json3-dev \
     libboost-date-time-dev \
+    libasio-dev \
     git \
     && rm -rf /var/lib/apt/lists/*
 
