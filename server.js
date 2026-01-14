@@ -10,45 +10,59 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // Proxy authentication and backend requests to C++ backend server
 // With graceful error handling if backend is not running
 const backendProxy = createProxyMiddleware({
-    target: 'http://localhost:3001',
+    target: 'http://127.0.0.1:3001',  // Use IPv4 explicitly
     changeOrigin: true,
     ws: true,
+    secure: false,
     logLevel: 'debug',
+    timeout: 30000,
+    proxyTimeout: 30000,
     onProxyReq: (proxyReq, req) => {
+        console.log(`[Proxy] ${req.method} ${req.url} -> http://localhost:3001${req.url}`);
         // Forward cookies to backend
         if (req.headers.cookie) {
             proxyReq.setHeader('Cookie', req.headers.cookie);
         }
+        // If body was parsed by express, re-write it for the proxy
+        if (req.body) {
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+        }
     },
     onProxyRes: (proxyRes, req, res) => {
+        console.log(`[Proxy] Response: ${proxyRes.statusCode} from http://localhost:3001${req.url}`);
         // Forward cookies from backend
         if (proxyRes.headers['set-cookie']) {
             res.setHeader('set-cookie', proxyRes.headers['set-cookie']);
         }
     },
     onError: (err, req, res) => {
-        console.error(`Proxy error: ${err.message}`);
+        console.error(`[Proxy Error] ${req.url}: ${err.message}`);
         if (!res.headersSent) {
             res.status(503).json({
                 error: 'Backend service not available',
-                message: err.message
+                message: err.message,
+                url: req.url
             });
         }
     }
 });
 
 // Proxy all /api/* endpoints to C++ backend (except leetcode-problems which is handled locally)
+// These must come BEFORE other middleware that might consume the request body
 app.use('/api/auth', backendProxy);
-app.use('/api/visualizations', backendProxy);
-app.use('/api/leetcode', backendProxy);
+app.use('/api/visualizations', express.json(), backendProxy);
+app.use('/api/leetcode', express.json(), backendProxy);
 app.use('/api/health', backendProxy);
+
+// Middleware for other routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
 app.use(express.static('.'));

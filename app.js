@@ -74,6 +74,18 @@ function handleFormSubmit(event) {
     let leftButton = new DirectionButton('left', progressBar);
     let rightButton = new DirectionButton('right', progressBar);
     progressBar.visualizeValueChange();
+
+    // Save to localStorage for history page
+    localStorage.setItem('lastCode', userCode);
+    localStorage.setItem('lastIncludedVars', includedVariables.join(','));
+    localStorage.setItem('lastSelectedVars', selectedVariables.join(','));
+
+    // Show the save visualization button
+    const saveBtn = document.getElementById('save-visualization-btn');
+    if (saveBtn) {
+        saveBtn.classList.remove('hidden');
+    }
+
     return userCode;
 }
 
@@ -107,7 +119,7 @@ function clearContainers() {
     d3.select('#slider-container').html('');
     d3.select('#left-container').html('');
     d3.select('#right-container').html('');
-    //d3.select('visualization-container').html('');
+    d3.select('#visualization-container').html('');
 }
 
 /*function handleSliderDirection(event) {

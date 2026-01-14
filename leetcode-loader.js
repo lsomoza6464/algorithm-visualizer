@@ -175,9 +175,7 @@ const target = 9;`,
         'maximum-depth-of-binary-tree': `const root = new TreeNode(3, new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)));`,
     };
     
-    return samples[problemSlug] || `// Sample data for ${problemSlug}
-const nums = [1, 2, 3, 4, 5];
-const target = 5;`;
+    return samples[problemSlug] || `// Sample data for ${problemSlug}`;
 }
 
 /**
@@ -245,16 +243,11 @@ async function getLeetCodeDefaults(problemNumber) {
         
     } catch (error) {
         console.error('Error in getLeetCodeDefaults:', error);
-        
-        // Return fallback defaults
-        return {
-            'user-code': getDefaultCode('fallback'),
-            'included-variables': 'nums, target, i, result',
-            'selected-variables': 'nums:i, target',
-            'leetcode-problem': 'two-sum',
-            'problem-title': 'Problem not found',
-            'problem-id': problemNumber
-        };
+        console.error('Failed to load problem:', problemNumber);
+        console.error('Error details:', error.stack);
+
+        // Throw the error so the UI can handle it properly
+        throw new Error(`Failed to load problem ${problemNumber}: ${error.message}`);
     }
 }
 

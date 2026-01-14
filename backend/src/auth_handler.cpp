@@ -126,7 +126,7 @@ crow::response AuthHandler::handleOAuthCallback(const std::string& provider, con
         // Redirect back to frontend with session cookie
         crow::response res(302);
         res.set_header("Location", "http://localhost:3000/auth.html");
-        res.set_header("Set-Cookie", "session_token=" + session_token + "; Path=/; HttpOnly; Max-Age=" + std::to_string(7 * 24 * 60 * 60));
+        res.set_header("Set-Cookie", "session_token=" + session_token + "; Path=/; Domain=localhost; SameSite=Lax; Max-Age=" + std::to_string(7 * 24 * 60 * 60));
         res.set_header("Access-Control-Allow-Origin", "http://localhost:3000");
         res.set_header("Access-Control-Allow-Credentials", "true");
         return res;

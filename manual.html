@@ -32,7 +32,7 @@
         // Function to populate form from URL parameters
         function populateFormFromURLParams() {
             const urlParams = new URLSearchParams(window.location.search);
-            
+
             // Get parameters from URL
             const userCode = urlParams.get('user-code');
             const includedVariables = urlParams.get('included-variables');
@@ -40,7 +40,7 @@
             const leetcodeProblem = urlParams.get('leetcode-problem');
             const problemTitle = urlParams.get('problem-title');
             const problemId = urlParams.get('problem-id');
-            
+
             // Update form fields if parameters exist
             if (includedVariables) {
                 document.getElementById('included-variables').value = includedVariables;
@@ -51,15 +51,46 @@
             if (leetcodeProblem) {
                 document.getElementById('leetcode-problem').value = leetcodeProblem;
             }
-            
+
             // Update page title if problem info is available
             if (problemTitle && problemId) {
                 const titleElement = document.querySelector('h1');
                 titleElement.textContent = `${problemId}. ${problemTitle} - Visualizer`;
             }
-            
+
+            // Record LeetCode problem view if problem parameters exist
+            if (leetcodeProblem && problemId) {
+                recordLeetCodeView(parseInt(problemId), leetcodeProblem, problemTitle || '');
+            }
+
             // Return the user code to be set in Monaco editor
             return userCode;
+        }
+
+        // Function to record LeetCode problem view
+        async function recordLeetCodeView(problemId, problemSlug, problemTitle) {
+            try {
+                const response = await fetch('/api/leetcode/view', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        problem_id: problemId,
+                        problem_slug: problemSlug,
+                        problem_title: problemTitle
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('LeetCode view recorded');
+                } else {
+                    console.warn('Failed to record LeetCode view (may not be logged in)');
+                }
+            } catch (error) {
+                console.error('Error recording LeetCode view:', error);
+            }
         }
 
         // Function to populate LeetCode problems datalist
@@ -323,37 +354,48 @@ while (neighbor != null) {
                         alert('Please enter a problem slug (e.g., "two-sum")');
                         return;
                     }
-                    
+
                     try {
+                        console.log(`[Load Problem] Attempting to load: "${problemSlug}"`);
+
                         // Find the problem number from the slug
                         const problems = await fetchLeetCodeProblemsList();
                         const problem = problems.find(p => p.slug === problemSlug);
-                        
+
                         if (!problem) {
-                            alert(`Problem "${problemSlug}" not found in the database`);
+                            alert(`Problem "${problemSlug}" not found in the database. Available problems can be seen in the dropdown suggestions.`);
                             return;
                         }
-                        
+
+                        console.log(`[Load Problem] Found problem #${problem.id}: ${problem.title}`);
+
                         // Get the defaults for this problem
                         const defaults = await getLeetCodeDefaults(problem.id);
-                        
+
+                        console.log(`[Load Problem] Loaded defaults:`, {
+                            problemSlug: defaults['leetcode-problem'],
+                            codeLength: defaults['user-code'].length,
+                            includedVars: defaults['included-variables'],
+                            selectedVars: defaults['selected-variables']
+                        });
+
                         // Update the Monaco editor with new code
                         monacoEditorInstance.setValue(defaults['user-code']);
-                        
+
                         // Update form fields
                         document.getElementById('included-variables').value = defaults['included-variables'];
                         document.getElementById('selected-variables').value = defaults['selected-variables'];
-                        
+
                         // Update page title
                         if (defaults['problem-title']) {
                             const titleElement = document.querySelector('h1');
                             titleElement.textContent = `${defaults['problem-id']}. ${defaults['problem-title']} - Visualizer`;
                         }
-                        
-                        console.log(`Loaded problem: ${problem.title}`);
+
+                        console.log(`[Load Problem] ✓ Problem loaded successfully`);
                     } catch (error) {
-                        console.error('Error loading problem:', error);
-                        alert(`Error loading problem: ${error.message}`);
+                        console.error('[Load Problem] Error:', error);
+                        alert(`Error loading problem: ${error.message}\n\nCheck the browser console for more details.`);
                     }
                 });
 
@@ -480,7 +522,7 @@ while (neighbor != null) {
                 Home
             </a>
             <div class="flex gap-3 items-center">
-                <button id="save-visualization-btn" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition text-sm flex items-center">
+                <button id="save-visualization-btn" class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition text-sm flex items-center hidden">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                     </svg>
@@ -537,7 +579,7 @@ while (neighbor != null) {
                     
                     <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-md text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">Submit your code</button>
                 </form>
-                
+
                 <br>
                 <div class="flex justify-center items-center space-x-4 mt-6">
                     <!--<div class="left-container" id="left-container"></div>
@@ -582,7 +624,7 @@ while (neighbor != null) {
     <!-- Scripts -->
     <!-- Save visualization functionality -->
     <script>
-        const API_BASE = 'http://localhost:3001';
+        const API_BASE = ''; // Use same origin - requests will be proxied to backend
 
         document.getElementById('save-visualization-btn').addEventListener('click', async () => {
             try {
@@ -603,12 +645,15 @@ while (neighbor != null) {
 
                 const description = prompt('Enter a description (optional):') || '';
 
-                // Get current code from Monaco editor
-                const code = monacoEditorInstance ? monacoEditorInstance.getValue() : '';
+                // Get code and variables from localStorage (set when code is submitted)
+                const code = localStorage.getItem('lastCode') || '';
+                const includedVars = localStorage.getItem('lastIncludedVars') || '';
+                const selectedVars = localStorage.getItem('lastSelectedVars') || '';
 
-                // Get variables from form
-                const includedVars = document.getElementById('included-variables').value || '';
-                const selectedVars = document.getElementById('selected-variables').value || '';
+                if (!code) {
+                    alert('No code to save. Please submit your code first by clicking "Submit your code".');
+                    return;
+                }
 
                 // Save to backend
                 const saveResponse = await fetch(`${API_BASE}/api/visualizations`, {

@@ -371,7 +371,7 @@ int main() {
     database->cleanExpiredSessions();
 
     std::cout << "Debug Visualizer Backend starting on port 3001..." << std::endl;
-    app.port(3001).multithreaded().run();
+    app.port(3001).run();
 
     return 0;
 }
