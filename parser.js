@@ -176,13 +176,7 @@ const snapshotCode = `
         if (loopTypes.has(line.type)) {
             // For all loops
             traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.body, 'body');
-        } /*else if (line.type === 'IfStatement') {
-            // For if/else blocks
-            traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.consequent, 'consequent');
-            if (line.alternate) {
-                traverseLoopsAndInjectSnapshots(line, includedVariables, selectedVariables, node.alternate, 'alternate');
-            }
-        }*/
+        }
     }
     const returnStatement = `console.log(snapshots);
     const variableMap = new Map()
@@ -235,26 +229,8 @@ const snapshotCode = `
     let bodyArr = [];
     const snapshotAst = acorn.parse(snapshotCode);
     console.log(includedVariables);
-    /*const originalVars = `
-        //let snapshot = new Map();
-        const context = ${JSON.stringify(includedVariables)};
-        let selectedSnapShot = new Map();
-        const selectedContext = ${JSON.stringify(selectedVariables)};
-    `;
-    console.log('origin', originalVars);
-
-    console.log(acorn.parse(originalVars));
-    bodyArr.push(acorn.parse(originalVars));*/
-
     console.log('currNode', node);
     let statements;
-    /*if (node.type === 'IfStatement') {
-        // For if statements, we need to handle consequent and alternate separately
-        statements = node.consequent.body || [node.consequent];
-    } else {*/
-        // For loops, use the body property
-        statements = node.body.body || node.body;
-    //}
     for (const line of statements) {
         bodyArr.push(line);
         const currentLineNumber = line.loc ? line.loc.start.line : 'undefined';
@@ -282,15 +258,6 @@ const snapshotCode = `
 
 let variableStates = [];
 const snapShot = new Map();
-
-//parseCode(userCode);
-
-
-/*const worker = new Worker('worker.js');
-worker.onmessage = function(event) {
-    const { snapshots } = event.data;
-    // ... Use the snapshots for visualization (e.g., update your D3.js visualization)
-}; */
 
 export function parseCode(userCode, includedVariables = [], selectedVariables = []) {
     const parser = acorn.Parser;
